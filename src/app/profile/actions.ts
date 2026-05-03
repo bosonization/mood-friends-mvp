@@ -14,11 +14,7 @@ const schema = z.object({
 
 export async function updateProfile(formData: FormData) {
   const supabase = await createClient();
-
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const parsed = schema.safeParse({
@@ -33,24 +29,11 @@ export async function updateProfile(formData: FormData) {
   }
 
   const { handleName, tagline, avatarUrl, isAdult } = parsed.data;
-
   if (hasContactLikeText(handleName) || hasContactLikeText(tagline)) {
     redirect(`/profile?message=${encodeURIComponent("連絡先や外部IDのような文字列は入れられません。")}`);
   }
 
-  const { error } = await supabase
-    .from("profiles")
-    .update({
-      handle_name: handleName,
-      tagline,
-      avatar_url: avatarUrl || null,
-      is_adult: isAdult
-    })
-    .eq("id", user.id);
-
-  if (error) {
-    redirect(`/profile?message=${encodeURIComponent("更新に失敗しました。")}`);
-  }
-
-  redirect("/profile?message=更新しました。");
+  const { error } = await supabase.from("profiles").update({ handle_name: handleName, tagline, avatar_url: avatarUrl || null, is_adult: isAdult }).eq("id", user.id);
+  if (error) redirect(`/profile?message=${encodeURIComponent("更新に失敗しました。")}`);
+  redirect(`/profile?message=${encodeURIComponent("更新しました。")}`);
 }

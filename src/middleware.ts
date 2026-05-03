@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const protectedPathPrefixes = [
   "/onboarding",
+  "/mood",
   "/home",
   "/friends",
   "/profile",
@@ -10,9 +11,7 @@ const protectedPathPrefixes = [
 ];
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request
-  });
+  let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,9 +26,7 @@ export async function middleware(request: NextRequest) {
             request.cookies.set(name, value);
           });
 
-          supabaseResponse = NextResponse.next({
-            request
-          });
+          supabaseResponse = NextResponse.next({ request });
 
           cookiesToSet.forEach(({ name, value, options }) => {
             supabaseResponse.cookies.set(name, value, options);
@@ -56,7 +53,7 @@ export async function middleware(request: NextRequest) {
 
   if (request.nextUrl.pathname === "/login" && user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/home";
+    url.pathname = "/mood";
     return NextResponse.redirect(url);
   }
 

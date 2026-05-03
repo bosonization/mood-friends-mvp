@@ -14,11 +14,7 @@ const schema = z.object({
 
 export async function createProfile(formData: FormData) {
   const supabase = await createClient();
-
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   if (formData.get("terms") !== "on") {
@@ -37,7 +33,6 @@ export async function createProfile(formData: FormData) {
   }
 
   const { handleName, tagline, avatarUrl, isAdult } = parsed.data;
-
   if (hasContactLikeText(handleName) || hasContactLikeText(tagline)) {
     redirect(`/onboarding?message=${encodeURIComponent("連絡先や外部IDのような文字列は入れられません。")}`);
   }
@@ -56,10 +51,6 @@ export async function createProfile(formData: FormData) {
     redirect(`/onboarding?message=${encodeURIComponent("プロフィール作成に失敗しました。")}`);
   }
 
-  await supabase.from("terms_consents").insert({
-    user_id: user.id,
-    terms_version: "2026-05-03"
-  });
-
-  redirect("/home");
+  await supabase.from("terms_consents").insert({ user_id: user.id, terms_version: "2026-05-03" });
+  redirect("/mood");
 }

@@ -24,6 +24,8 @@ export type MoodStatus = {
   user_id: string;
   mood_key: string;
   last_login_at: string;
+  session_started_at: string;
+  session_expires_at: string;
   created_at: string;
   updated_at: string;
 };

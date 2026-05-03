@@ -14,3 +14,7 @@ export type MoodKey = (typeof MOODS)[number]["key"];
 export function getMood(key: string | null | undefined) {
   return MOODS.find((mood) => mood.key === key) ?? null;
 }
+
+export function isMoodKey(value: string): value is MoodKey {
+  return MOODS.some((mood) => mood.key === value);
+}

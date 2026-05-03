@@ -2,30 +2,22 @@
 
 :root {
   color-scheme: light;
-  --background: #fff7ed;
-  --foreground: #24140e;
+  --background: #fbf7f0;
+  --foreground: #1d1510;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(251, 191, 36, 0.24), transparent 32rem),
-    radial-gradient(circle at bottom right, rgba(251, 146, 60, 0.18), transparent 28rem),
+    radial-gradient(circle at 12% 8%, rgba(255, 138, 101, 0.22), transparent 24rem),
+    radial-gradient(circle at 92% 12%, rgba(168, 85, 247, 0.18), transparent 28rem),
+    radial-gradient(circle at 50% 100%, rgba(20, 184, 166, 0.13), transparent 30rem),
     var(--background);
   color: var(--foreground);
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-input,
-button,
-textarea {
-  font: inherit;
-}
+a { color: inherit; text-decoration: none; }
+input, button, textarea { font: inherit; }
+button { cursor: pointer; }

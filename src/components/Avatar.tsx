@@ -19,16 +19,13 @@ export function Avatar({ src, name, size = "md" }: AvatarProps) {
       <img
         src={src}
         alt={`${name}のアイコン`}
-        className={`${sizeClass[size]} rounded-full border border-orange-100 object-cover`}
+        className={`${sizeClass[size]} rounded-full border border-white object-cover shadow-sm`}
       />
     );
   }
 
   return (
-    <div
-      className={`${sizeClass[size]} grid place-items-center rounded-full border border-orange-100 bg-orange-100 font-bold text-orange-700`}
-      aria-hidden="true"
-    >
+    <div className={`${sizeClass[size]} grid place-items-center rounded-full border border-white bg-gradient-to-br from-orange-100 to-pink-100 font-bold text-orange-700 shadow-sm`} aria-hidden="true">
       {initial}
     </div>
   );

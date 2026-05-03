@@ -1,5 +1,5 @@
--- Mood Friends MVP schema
--- Run this in Supabase SQL Editor.
+-- eMoodition MVP schema
+-- For a fresh Supabase project, run this entire file.
 
 create extension if not exists pgcrypto;
 
@@ -32,7 +32,6 @@ begin
   return code;
 end;
 $$;
-
 
 create or replace function public.prevent_profile_immutable_changes()
 returns trigger
@@ -123,11 +122,14 @@ create table if not exists public.mood_statuses (
   user_id uuid primary key references public.profiles(id) on delete cascade,
   mood_key text not null,
   last_login_at timestamptz not null default now(),
+  session_started_at timestamptz not null default now(),
+  session_expires_at timestamptz not null default (now() + interval '10 minutes'),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint mood_statuses_mood_key_check check (
     mood_key in ('food', 'drink', 'travel', 'game', 'cafe', 'walk', 'movie', 'work')
-  )
+  ),
+  constraint mood_statuses_session_check check (session_expires_at > session_started_at)
 );
 
 create table if not exists public.terms_consents (
@@ -159,6 +161,21 @@ create table if not exists public.reports (
   constraint reports_detail_length check (detail is null or char_length(detail) <= 1000)
 );
 
+-- ---------- storage ----------
+
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'avatars',
+  'avatars',
+  true,
+  2097152,
+  array['image/png', 'image/jpeg', 'image/webp', 'image/gif']
+)
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
 -- ---------- triggers ----------
 
 drop trigger if exists profiles_prevent_immutable_changes on public.profiles;
@@ -186,7 +203,7 @@ create trigger mood_statuses_set_updated_at
 before update on public.mood_statuses
 for each row execute function public.set_updated_at();
 
--- ---------- RPC: request friend by 10-digit member code ----------
+-- ---------- RPC ----------
 
 create or replace function public.request_friend_by_code(target_code text)
 returns text
@@ -250,8 +267,10 @@ alter table public.mood_statuses enable row level security;
 alter table public.terms_consents enable row level security;
 alter table public.blocks enable row level security;
 alter table public.reports enable row level security;
+alter table storage.objects enable row level security;
 
 -- profiles
+
 drop policy if exists "profiles_select_self_or_connected" on public.profiles;
 create policy "profiles_select_self_or_connected"
 on public.profiles
@@ -287,6 +306,7 @@ using (id = auth.uid())
 with check (id = auth.uid());
 
 -- friendships
+
 drop policy if exists "friendships_select_involved" on public.friendships;
 create policy "friendships_select_involved"
 on public.friendships
@@ -317,6 +337,7 @@ to authenticated
 using (requester_id = auth.uid() or addressee_id = auth.uid());
 
 -- mood_statuses
+
 drop policy if exists "mood_statuses_select_self_or_friend" on public.mood_statuses;
 create policy "mood_statuses_select_self_or_friend"
 on public.mood_statuses
@@ -343,6 +364,7 @@ using (user_id = auth.uid())
 with check (user_id = auth.uid());
 
 -- terms_consents
+
 drop policy if exists "terms_consents_select_own" on public.terms_consents;
 create policy "terms_consents_select_own"
 on public.terms_consents
@@ -358,6 +380,7 @@ to authenticated
 with check (user_id = auth.uid());
 
 -- blocks
+
 drop policy if exists "blocks_select_own" on public.blocks;
 create policy "blocks_select_own"
 on public.blocks
@@ -380,6 +403,7 @@ to authenticated
 using (blocker_id = auth.uid());
 
 -- reports
+
 drop policy if exists "reports_insert_own" on public.reports;
 create policy "reports_insert_own"
 on public.reports
@@ -393,3 +417,46 @@ on public.reports
 for select
 to authenticated
 using (reporter_id = auth.uid());
+
+-- storage policies
+
+drop policy if exists "avatars_public_read" on storage.objects;
+create policy "avatars_public_read"
+on storage.objects
+for select
+to public
+using (bucket_id = 'avatars');
+
+drop policy if exists "avatars_insert_own_folder" on storage.objects;
+create policy "avatars_insert_own_folder"
+on storage.objects
+for insert
+to authenticated
+with check (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
+drop policy if exists "avatars_update_own_folder" on storage.objects;
+create policy "avatars_update_own_folder"
+on storage.objects
+for update
+to authenticated
+using (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = auth.uid()::text
+)
+with check (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
+drop policy if exists "avatars_delete_own_folder" on storage.objects;
+create policy "avatars_delete_own_folder"
+on storage.objects
+for delete
+to authenticated
+using (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);

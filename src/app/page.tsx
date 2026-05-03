@@ -4,84 +4,84 @@ import { createClient } from "@/lib/supabase/server";
 
 export default async function LandingPage() {
   const supabase = await createClient();
-
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
-  if (user) {
-    redirect("/home");
-  }
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) redirect("/mood");
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-10">
-      <section className="grid flex-1 items-center gap-10 md:grid-cols-[1.1fr_0.9fr]">
+    <main className="min-h-screen overflow-hidden px-6 py-7">
+      <nav className="mx-auto flex max-w-6xl items-center justify-between rounded-full border border-white/70 bg-white/70 px-4 py-3 shadow-sm backdrop-blur-xl">
+        <div className="flex items-center gap-3 font-black">
+          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-orange-400 via-pink-500 to-violet-600 text-white shadow-md">e</span>
+          <span>eMoodition</span>
+        </div>
+        <Link href="/login" className="rounded-full bg-stone-950 px-5 py-2.5 text-sm font-bold text-white shadow-md hover:bg-stone-800">
+          ログイン
+        </Link>
+      </nav>
+
+      <section className="mx-auto grid max-w-6xl items-center gap-10 py-16 lg:grid-cols-[1.08fr_0.92fr] lg:py-24">
         <div>
-          <p className="mb-4 inline-flex rounded-full border border-orange-200 bg-white/80 px-4 py-2 text-sm font-medium">
-            チャットなし。友達だけの気分共有。
+          <p className="mb-5 inline-flex rounded-full border border-orange-200 bg-white/70 px-4 py-2 text-sm font-bold text-orange-800 shadow-sm backdrop-blur">
+            10分だけ、今の気分をそっと共有。
           </p>
-          <h1 className="text-4xl font-black leading-tight tracking-tight sm:text-6xl">
-            「暇？」を言う前の、
-            <br />
-            ちょうどいい一押し。
+          <h1 className="max-w-3xl text-5xl font-black leading-[1.05] tracking-tight text-stone-950 sm:text-7xl">
+            暇とは言えない日にも、
+            <span className="block bg-gradient-to-r from-orange-500 via-pink-500 to-violet-600 bg-clip-text text-transparent">気分は置ける。</span>
           </h1>
-          <p className="mt-6 max-w-xl text-base leading-8 text-stone-700">
-            Mood Friendsは、既につながっている友達にだけ「今の気分」と「ラストログイン」を共有するMVPです。
-            DMもチャットもありません。会話のきっかけだけを、そっと置きます。
+          <p className="mt-7 max-w-2xl text-base leading-8 text-stone-700 sm:text-lg">
+            eMooditionは、友達だけに「今の気分」と「その時のログイン」を共有するアプリです。
+            チャットもDMもなし。普段の会話が始まる、ほんの少し前のサインだけ。
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-9 flex flex-wrap gap-3">
             <Link
               href="/login"
-              className="rounded-full bg-stone-950 px-6 py-3 font-bold text-white shadow-lg shadow-stone-300 hover:bg-stone-800"
+              className="rounded-full bg-gradient-to-r from-orange-500 via-pink-500 to-violet-600 px-7 py-4 font-black text-white shadow-xl shadow-pink-200 transition hover:scale-[1.02]"
             >
               はじめる
             </Link>
-            <a
-              href="#features"
-              className="rounded-full border border-orange-200 bg-white/70 px-6 py-3 font-bold hover:bg-white"
-            >
+            <a href="#features" className="rounded-full border border-white bg-white/70 px-7 py-4 font-black text-stone-800 shadow-sm backdrop-blur hover:bg-white">
               機能を見る
             </a>
           </div>
         </div>
 
-        <div className="rounded-[2rem] border border-orange-100 bg-white/75 p-5 shadow-xl shadow-orange-100 backdrop-blur">
-          <div className="rounded-[1.5rem] bg-stone-950 p-4 text-white">
-            <div className="mb-4 flex items-center justify-between">
-              <span className="text-sm text-stone-300">友達の今</span>
-              <span className="rounded-full bg-white/10 px-3 py-1 text-xs">チャットなし</span>
-            </div>
+        <div className="relative">
+          <div className="absolute -left-8 -top-8 h-40 w-40 rounded-full bg-orange-300/30 blur-3xl" />
+          <div className="absolute -bottom-8 -right-8 h-44 w-44 rounded-full bg-violet-400/25 blur-3xl" />
+          <div className="relative rounded-[2.3rem] border border-white/70 bg-white/75 p-5 shadow-2xl shadow-orange-100 backdrop-blur-xl">
+            <div className="rounded-[1.8rem] bg-stone-950 p-5 text-white shadow-xl">
+              <div className="mb-5 flex items-center justify-between">
+                <span className="text-sm text-stone-300">10分セッション</span>
+                <span className="rounded-full bg-white/10 px-3 py-1 text-xs">No Chat</span>
+              </div>
 
-            <div className="space-y-3">
-              {[
-                ["🍚", "佐藤", "食事", "12分前"],
-                ["🎮", "yuki", "ゲーム", "28分前"],
-                ["☕", "mori", "カフェ", "1時間前"]
-              ].map(([icon, name, mood, time]) => (
-                <div key={name} className="flex items-center gap-3 rounded-2xl bg-white/10 p-3">
-                  <div className="grid h-11 w-11 place-items-center rounded-full bg-white/15 text-xl">
-                    {icon}
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  ["🍚", "食事", "あと8分"],
+                  ["🎮", "ゲーム", "あと5分"],
+                  ["☕", "カフェ", "あと2分"],
+                  ["🚶", "散歩", "あと9分"]
+                ].map(([icon, mood, time]) => (
+                  <div key={mood} className="rounded-3xl border border-white/10 bg-white/10 p-4">
+                    <p className="text-4xl">{icon}</p>
+                    <p className="mt-3 font-black">{mood}</p>
+                    <p className="mt-1 text-xs text-stone-400">{time}</p>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-bold">{name}</p>
-                    <p className="text-sm text-stone-300">{mood}</p>
-                  </div>
-                  <p className="text-xs text-stone-400">{time}</p>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="features" className="grid gap-4 pb-10 md:grid-cols-3">
+      <section id="features" className="mx-auto grid max-w-6xl gap-4 pb-12 md:grid-cols-3">
         {[
-          ["10桁コード", "会員コードで友達申請。公開検索はありません。"],
-          ["相互承認", "承認済みの友達だけが一覧に表示されます。"],
-          ["気分8種", "食事、お酒、旅行、ゲームなどをワンタップ共有。"]
+          ["10分で固定", "選んだ気分はセッション中変更不可。更新頻発を防ぎます。"],
+          ["友達だけ", "会員コードと相互承認で、既につながっている人だけに表示。"],
+          ["チャットなし", "アプリ内で連絡先やID交換をさせない設計です。"]
         ].map(([title, body]) => (
-          <div key={title} className="rounded-3xl border border-orange-100 bg-white/70 p-5">
-            <h2 className="font-bold">{title}</h2>
+          <div key={title} className="rounded-[1.7rem] border border-white/70 bg-white/70 p-6 shadow-sm backdrop-blur">
+            <h2 className="text-lg font-black">{title}</h2>
             <p className="mt-2 text-sm leading-6 text-stone-600">{body}</p>
           </div>
         ))}
