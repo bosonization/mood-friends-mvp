@@ -24,15 +24,17 @@ type FriendsMoodDisplayProps = {
   initialViewMode: ViewMode;
 };
 
+type BubbleSize = "large" | "medium" | "small";
+
 const moodColors: Record<string, string> = {
-  食事: "from-orange-300 via-amber-200 to-white",
-  お酒: "from-yellow-300 via-orange-200 to-white",
-  ウキウキ: "from-pink-400 via-rose-200 to-white",
-  ゲーム: "from-violet-400 via-indigo-200 to-white",
-  カフェ: "from-stone-300 via-orange-100 to-white",
-  散歩: "from-emerald-300 via-lime-100 to-white",
-  会話: "from-sky-300 via-cyan-100 to-white",
-  作業: "from-blue-300 via-slate-100 to-white"
+  食事: "from-orange-200 via-amber-100 to-white",
+  お酒: "from-yellow-200 via-orange-100 to-white",
+  ウキウキ: "from-pink-200 via-rose-100 to-white",
+  ゲーム: "from-violet-200 via-indigo-100 to-white",
+  カフェ: "from-stone-200 via-orange-50 to-white",
+  散歩: "from-emerald-200 via-lime-100 to-white",
+  会話: "from-sky-200 via-cyan-100 to-white",
+  作業: "from-blue-200 via-slate-100 to-white"
 };
 
 const goldenAngle = Math.PI * (3 - Math.sqrt(5));
@@ -58,20 +60,27 @@ function getTimestamp(item: FriendMoodViewItem) {
   return new Date(item.lastLoginAt).getTime();
 }
 
-function getBubbleSize(item: FriendMoodViewItem, index: number) {
-  if (item.freshness === "hot") return 142 + (index % 2) * 12;
-  if (item.freshness === "fresh") return 116 + (index % 3) * 8;
-  return 88 + (index % 3) * 6;
+function getBubbleSizeType(item: FriendMoodViewItem): BubbleSize {
+  if (item.freshness === "hot") return "large";
+  if (item.freshness === "fresh") return "medium";
+  return "small";
+}
+
+function getBubbleSizePx(size: BubbleSize, index: number) {
+  if (size === "large") return 148 + (index % 2) * 10;
+  if (size === "medium") return 120 + (index % 3) * 7;
+  return 92 + (index % 3) * 4;
 }
 
 function getBubbleStyle(item: FriendMoodViewItem, index: number) {
+  const sizeType = getBubbleSizeType(item);
   const angle = index * goldenAngle + (moodBias[item.moodLabel ?? ""] ?? 0);
-  const ring = item.freshness === "hot" ? 0.21 : item.freshness === "fresh" ? 0.34 : 0.43;
+  const ring = sizeType === "large" ? 0.2 : sizeType === "medium" ? 0.34 : 0.45;
   const wobble = ((index % 4) - 1.5) * 0.018;
   const radius = ring + wobble;
   const x = 50 + Math.cos(angle) * radius * 100;
   const y = 50 + Math.sin(angle) * radius * 78;
-  const size = getBubbleSize(item, index);
+  const size = getBubbleSizePx(sizeType, index);
 
   return {
     width: `${size}px`,
@@ -84,18 +93,60 @@ function getBubbleStyle(item: FriendMoodViewItem, index: number) {
 
 function getBubbleClasses(item: FriendMoodViewItem) {
   if (item.freshness === "hot") {
-    return "border-red-200 bg-red-50/90 shadow-[0_0_38px_rgba(239,68,68,0.35)] ring-4 ring-red-100/80";
+    return "border-red-200/90 bg-white/80 shadow-[0_0_44px_rgba(239,68,68,0.32)] ring-4 ring-red-200/70";
   }
   if (item.freshness === "fresh") {
-    return "border-emerald-200 bg-emerald-50/90 shadow-[0_0_30px_rgba(16,185,129,0.25)] ring-4 ring-emerald-100/70";
+    return "border-emerald-200/90 bg-white/78 shadow-[0_0_34px_rgba(16,185,129,0.25)] ring-4 ring-emerald-200/65";
   }
-  return "border-white/70 bg-white/75 shadow-xl shadow-stone-200/60";
+  return "border-white/75 bg-white/68 shadow-xl shadow-stone-200/60 ring-1 ring-white/75";
 }
 
-function getBadgeClasses(item: FriendMoodViewItem) {
-  if (item.freshness === "hot") return "bg-red-500 text-white";
-  if (item.freshness === "fresh") return "bg-emerald-500 text-white";
-  return "bg-white/75 text-stone-600";
+function getBubbleLabelClasses(sizeType: BubbleSize) {
+  if (sizeType === "large") return "mt-2 max-w-[92%] text-[12px] sm:text-[13px]";
+  if (sizeType === "medium") return "mt-1.5 max-w-[90%] text-[11px] sm:text-[12px]";
+  return "mt-1 max-w-[86%] text-[9px] sm:text-[10px]";
+}
+
+function getBubbleTimeClasses(sizeType: BubbleSize) {
+  if (sizeType === "large") return "mt-1 max-w-[88%] text-[10px] sm:text-[11px]";
+  if (sizeType === "medium") return "mt-0.5 max-w-[86%] text-[9px] sm:text-[10px]";
+  return "mt-0.5 max-w-[78%] text-[8px] sm:text-[9px]";
+}
+
+function getMoodBadgeClasses(item: FriendMoodViewItem) {
+  if (item.freshness === "hot") return "border-red-100 bg-red-500 text-white shadow-lg shadow-red-200";
+  if (item.freshness === "fresh") return "border-emerald-100 bg-emerald-500 text-white shadow-lg shadow-emerald-200";
+  return "border-white bg-white/90 text-stone-700 shadow-md shadow-stone-200";
+}
+
+function getMoodBadgeSize(sizeType: BubbleSize) {
+  if (sizeType === "large") return "right-4 top-4 h-9 w-9 text-xl";
+  if (sizeType === "medium") return "right-3 top-3 h-8 w-8 text-lg";
+  return "right-2 top-2 h-7 w-7 text-base";
+}
+
+function getAvatarSize(sizeType: BubbleSize) {
+  if (sizeType === "large") return "h-16 w-16 text-2xl sm:h-[4.6rem] sm:w-[4.6rem]";
+  if (sizeType === "medium") return "h-13 w-13 text-xl sm:h-14 sm:w-14";
+  return "h-10 w-10 text-base sm:h-11 sm:w-11";
+}
+
+function getCenterAvatarSize(sizeType: BubbleSize) {
+  if (sizeType === "large") return "h-[4.15rem] w-[4.15rem] text-2xl sm:h-[4.7rem] sm:w-[4.7rem]";
+  if (sizeType === "medium") return "h-14 w-14 text-xl sm:h-16 sm:w-16";
+  return "h-10 w-10 text-base sm:h-11 sm:w-11";
+}
+
+function formatCompactTime(input: string | null | undefined, fallback: string) {
+  if (!input) return fallback;
+  const minutes = Math.max(0, Math.floor((Date.now() - new Date(input).getTime()) / 1000 / 60));
+  if (minutes < 1) return "now";
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d`;
+  return fallback;
 }
 
 export function FriendsMoodDisplay({ items, initialViewMode }: FriendsMoodDisplayProps) {
@@ -151,24 +202,27 @@ function MoodOrbit({ items }: { items: FriendMoodViewItem[] }) {
   const selected = visibleItems.find((item) => item.id === selectedId) ?? visibleItems[0];
 
   return (
-    <div className="mt-5 overflow-hidden rounded-[2rem] border border-white/70 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.95),transparent_34%),radial-gradient(circle_at_80%_30%,rgba(236,72,153,0.16),transparent_35%),radial-gradient(circle_at_50%_86%,rgba(20,184,166,0.14),transparent_42%)] p-4 shadow-inner">
-      <div className="grid gap-4 xl:grid-cols-[1fr_260px]">
-        <div className="relative min-h-[520px] overflow-hidden rounded-[1.65rem] border border-white/60 bg-white/35 shadow-inner backdrop-blur-xl sm:min-h-[600px]">
-          <div className="absolute left-1/2 top-1/2 h-[72%] w-[72%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/70" />
-          <div className="absolute left-1/2 top-1/2 h-[48%] w-[48%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/70" />
-          <div className="absolute left-1/2 top-1/2 h-[25%] w-[25%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/70" />
+    <div className="mt-5 overflow-hidden rounded-[2rem] border border-white/70 bg-[radial-gradient(circle_at_24%_18%,rgba(255,255,255,0.96),transparent_32%),radial-gradient(circle_at_78%_26%,rgba(244,63,94,0.14),transparent_35%),radial-gradient(circle_at_45%_82%,rgba(16,185,129,0.14),transparent_43%)] p-4 shadow-inner">
+      <div className="grid gap-4 xl:grid-cols-[1fr_270px]">
+        <div className="relative min-h-[540px] overflow-hidden rounded-[1.65rem] border border-white/60 bg-white/35 shadow-inner backdrop-blur-xl sm:min-h-[620px]">
+          <div className="absolute left-1/2 top-1/2 h-[78%] w-[78%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/70" />
+          <div className="absolute left-1/2 top-1/2 h-[53%] w-[53%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/70" />
+          <div className="absolute left-1/2 top-1/2 h-[28%] w-[28%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/70" />
+          <div className="absolute left-1/2 top-1/2 h-[11rem] w-[11rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-white/85 via-white/50 to-white/20 blur-xl" />
 
           <div className="absolute left-1/2 top-1/2 grid h-28 w-28 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/80 bg-white/80 text-center shadow-2xl backdrop-blur-xl">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.22em] text-pink-500">Orbit</p>
-              <p className="mt-1 text-sm font-black text-stone-900">気分の距離感</p>
+              <p className="mt-1 text-sm font-black text-stone-900">気分の気配</p>
             </div>
           </div>
 
           {visibleItems.map((item, index) => {
             const style = getBubbleStyle(item, index);
-            const gradient = moodColors[item.moodLabel ?? ""] ?? "from-stone-200 via-white to-white";
+            const gradient = moodColors[item.moodLabel ?? ""] ?? "from-stone-100 via-white to-white";
             const isSelected = selected?.id === item.id;
+            const sizeType = getBubbleSizeType(item);
+            const compactTime = formatCompactTime(item.lastLoginAt, item.relativeTime);
 
             return (
               <button
@@ -177,13 +231,21 @@ function MoodOrbit({ items }: { items: FriendMoodViewItem[] }) {
                 onClick={() => setSelectedId(item.id)}
                 style={style}
                 className={`group absolute rounded-full border p-2 text-center backdrop-blur-xl transition duration-300 hover:z-20 hover:scale-110 focus:z-20 focus:outline-none focus:ring-4 focus:ring-fuchsia-200 ${getBubbleClasses(item)} ${isSelected ? "z-20 scale-105" : "z-10"}`}
+                aria-label={`${item.handleName} ${item.moodLabel ?? "未登録"} ${item.relativeTime}`}
               >
-                <span className={`absolute inset-1 rounded-full bg-gradient-to-br ${gradient} opacity-70`} />
+                <span className={`absolute inset-1 rounded-full bg-gradient-to-br ${gradient} opacity-65`} />
+                <span className="absolute inset-0 rounded-full bg-white/20" />
+                <span className={`absolute grid place-items-center rounded-full border ${getMoodBadgeClasses(item)} ${getMoodBadgeSize(sizeType)}`}>
+                  {item.moodIcon ?? "◌"}
+                </span>
                 <span className="relative flex h-full flex-col items-center justify-center overflow-hidden rounded-full px-2">
-                  <span className="text-3xl drop-shadow-sm sm:text-4xl">{item.moodIcon ?? "◌"}</span>
-                  <span className="mt-1 max-w-[95%] truncate text-xs font-black text-stone-900 sm:text-sm">{item.handleName}</span>
-                  <span className="max-w-[95%] truncate text-[10px] font-bold text-stone-600">{item.moodLabel ?? "未登録"}</span>
-                  <span className={`mt-1 rounded-full px-2 py-0.5 text-[10px] font-black ${getBadgeClasses(item)}`}>{item.relativeTime}</span>
+                  <FriendAvatar item={item} className={getCenterAvatarSize(sizeType)} />
+                  <span className={`${getBubbleLabelClasses(sizeType)} block truncate font-black leading-none text-stone-950 drop-shadow-sm`}>
+                    {item.handleName}
+                  </span>
+                  <span className={`${getBubbleTimeClasses(sizeType)} block truncate font-black leading-none text-stone-600`}>
+                    {compactTime}
+                  </span>
                 </span>
               </button>
             );
@@ -196,37 +258,48 @@ function MoodOrbit({ items }: { items: FriendMoodViewItem[] }) {
           ) : null}
         </div>
 
-        <div className="rounded-[1.65rem] border border-white/70 bg-white/75 p-4 shadow-sm backdrop-blur-xl">
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-stone-400">Selected</p>
-          {selected ? (
-            <div className="mt-4">
-              <div className="flex items-center gap-3">
-                <FriendAvatar item={selected} size="lg" />
-                <div className="min-w-0">
-                  <p className="truncate text-lg font-black">{selected.handleName}</p>
-                  <p className="truncate text-sm text-stone-500">{selected.tagline || "一言未設定"}</p>
-                </div>
-              </div>
-              <div className="mt-5 rounded-[1.4rem] bg-stone-950 p-4 text-white">
-                <div className="flex items-center gap-3">
-                  <span className="text-5xl">{selected.moodIcon ?? "◌"}</span>
-                  <div>
-                    <p className="text-xl font-black">{selected.moodLabel ?? "未登録"}</p>
-                    <p className="text-sm text-stone-300">{selected.moodDescription ?? "まだ気分がありません"}</p>
-                  </div>
-                </div>
-                <p className="mt-4 text-xs text-stone-400">{selected.relativeTime}</p>
-                {selected.active && selected.remainingTime ? (
-                  <p className="mt-1 text-xs text-stone-400">現在のセッション 残り {selected.remainingTime}</p>
-                ) : null}
-              </div>
-              <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[10px] font-bold">
-                <span className="rounded-full bg-red-100 px-2 py-2 text-red-700">1時間以内</span>
-                <span className="rounded-full bg-emerald-100 px-2 py-2 text-emerald-700">6時間以内</span>
-                <span className="rounded-full bg-stone-100 px-2 py-2 text-stone-500">その他</span>
-              </div>
+        <SelectedFriendCard selected={selected} />
+      </div>
+    </div>
+  );
+}
+
+function SelectedFriendCard({ selected }: { selected?: FriendMoodViewItem }) {
+  if (!selected) return null;
+
+  return (
+    <div className="rounded-[1.65rem] border border-white/70 bg-white/75 p-4 shadow-sm backdrop-blur-xl">
+      <p className="text-xs font-black uppercase tracking-[0.22em] text-stone-400">Selected</p>
+      <div className="mt-4">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <FriendAvatar item={selected} className="h-16 w-16 text-2xl" />
+            <span className={`absolute -right-1 -top-1 grid h-8 w-8 place-items-center rounded-full border ${getMoodBadgeClasses(selected)}`}>
+              {selected.moodIcon ?? "◌"}
+            </span>
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-lg font-black">{selected.handleName}</p>
+            <p className="truncate text-sm text-stone-500">{selected.tagline || "一言未設定"}</p>
+          </div>
+        </div>
+        <div className="mt-5 rounded-[1.4rem] bg-stone-950 p-4 text-white">
+          <div className="flex items-center gap-3">
+            <span className="text-5xl">{selected.moodIcon ?? "◌"}</span>
+            <div>
+              <p className="text-xl font-black">{selected.moodLabel ?? "未登録"}</p>
+              <p className="text-sm text-stone-300">{selected.moodDescription ?? "まだ気分がありません"}</p>
             </div>
+          </div>
+          <p className="mt-4 text-xs text-stone-400">{selected.relativeTime}</p>
+          {selected.active && selected.remainingTime ? (
+            <p className="mt-1 text-xs text-stone-400">現在のセッション 残り {selected.remainingTime}</p>
           ) : null}
+        </div>
+        <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[10px] font-bold">
+          <span className="rounded-full bg-red-100 px-2 py-2 text-red-700">1時間以内</span>
+          <span className="rounded-full bg-emerald-100 px-2 py-2 text-emerald-700">6時間以内</span>
+          <span className="rounded-full bg-stone-100 px-2 py-2 text-stone-500">その他</span>
         </div>
       </div>
     </div>
@@ -250,7 +323,7 @@ function PulseList({ items }: { items: FriendMoodViewItem[] }) {
 
         return (
           <article key={item.id} className={`flex items-center gap-3 rounded-3xl border p-4 shadow-sm ${accent}`}>
-            <FriendAvatar item={item} />
+            <FriendAvatar item={item} className="h-14 w-14 text-xl" />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="truncate font-bold">{item.handleName}</h3>
@@ -269,16 +342,15 @@ function PulseList({ items }: { items: FriendMoodViewItem[] }) {
   );
 }
 
-function FriendAvatar({ item, size = "md" }: { item: FriendMoodViewItem; size?: "md" | "lg" }) {
-  const box = size === "lg" ? "h-16 w-16 text-2xl" : "h-14 w-14 text-xl";
+function FriendAvatar({ item, className }: { item: FriendMoodViewItem; className: string }) {
   const initial = item.handleName.slice(0, 1) || "？";
 
   if (item.avatarUrl) {
-    return <img src={item.avatarUrl} alt={`${item.handleName}のアイコン`} className={`${box} rounded-full border border-white object-cover shadow-sm`} />;
+    return <img src={item.avatarUrl} alt={`${item.handleName}のアイコン`} className={`${className} rounded-full border-2 border-white object-cover shadow-sm`} />;
   }
 
   return (
-    <div className={`${box} grid place-items-center rounded-full border border-white bg-gradient-to-br from-orange-100 to-pink-100 font-black text-orange-700 shadow-sm`}>
+    <div className={`${className} grid place-items-center rounded-full border-2 border-white bg-gradient-to-br from-orange-100 to-pink-100 font-black text-orange-700 shadow-sm`}>
       {initial}
     </div>
   );

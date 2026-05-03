@@ -1,6 +1,7 @@
 import { TransitionLink } from "@/components/TransitionLink";
 import { SubmitButton } from "@/components/SubmitButton";
 import { AppFooter } from "@/components/AppFooter";
+import { EmotionDock } from "@/components/EmotionDock";
 import { signOut } from "@/app/login/actions";
 
 type AppShellProps = { children: React.ReactNode };
@@ -30,13 +31,7 @@ export function AppShell({ children }: AppShellProps) {
 
       <main className="flex-1">{children}</main>
       <AppFooter />
-
-      <nav className="sticky bottom-4 mt-6 grid grid-cols-4 rounded-3xl border border-white/70 bg-white/90 p-2 text-center text-xs shadow-lg backdrop-blur-xl sm:hidden">
-        <TransitionLink className="rounded-2xl px-2 py-3 hover:bg-orange-50" href="/home">ホーム</TransitionLink>
-        <TransitionLink className="rounded-2xl px-2 py-3 hover:bg-orange-50" href="/friends">友達</TransitionLink>
-        <TransitionLink className="rounded-2xl px-2 py-3 hover:bg-orange-50" href="/profile">プロフ</TransitionLink>
-        <TransitionLink className="rounded-2xl px-2 py-3 hover:bg-orange-50" href="/settings">設定</TransitionLink>
-      </nav>
+      <EmotionDock />
     </div>
   );
 }
