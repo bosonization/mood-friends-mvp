@@ -107,9 +107,18 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                         <h3 className="truncate font-bold">{friend.handle_name}</h3>
                         {friend.tagline ? <span className="rounded-full bg-orange-50 px-2 py-1 text-xs text-orange-800">{friend.tagline}</span> : null}
                       </div>
-                      <p className="mt-1 text-sm text-stone-600">{active && mood ? `${mood.icon} ${mood.label}` : "セッション外"}</p>
+                      <p className="mt-1 text-sm text-stone-600">
+                        {mood ? `${mood.icon} ${mood.label}` : "まだ気分未登録"}
+                      </p>
+                      {mood ? (
+                        <p className="mt-1 text-xs text-stone-400">
+                          {active ? "現在のセッション" : "最後に登録された気分"}
+                        </p>
+                      ) : null}
                     </div>
-                    <p className="shrink-0 text-xs text-stone-500">{active ? formatRemainingTime(friendMood) : formatRelativeTime(friendMood?.session_expires_at)}</p>
+                    <p className="shrink-0 text-right text-xs text-stone-500">
+                      {active ? formatRemainingTime(friendMood) : formatRelativeTime(friendMood?.last_login_at)}
+                    </p>
                   </article>
                 );
               })}
