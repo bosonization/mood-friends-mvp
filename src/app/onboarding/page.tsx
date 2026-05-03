@@ -3,6 +3,7 @@ import { createProfile } from "./actions";
 import { AvatarUploader } from "@/components/AvatarUploader";
 import { FormMessage } from "@/components/FormMessage";
 import { SubmitButton } from "@/components/SubmitButton";
+import { TransitionLink } from "@/components/TransitionLink";
 import { createClient } from "@/lib/supabase/server";
 
 type OnboardingPageProps = { searchParams: Promise<{ message?: string }> };
@@ -29,7 +30,10 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
           <label className="block text-sm font-bold">ハンドルネーム<input className="mt-2 w-full rounded-2xl border border-stone-200 px-4 py-3 outline-none focus:border-pink-400" name="handleName" maxLength={30} required placeholder="例：yuki" /></label>
           <label className="block text-sm font-bold">一言（15文字以下）<input className="mt-2 w-full rounded-2xl border border-stone-200 px-4 py-3 outline-none focus:border-pink-400" name="tagline" maxLength={15} placeholder="例：夜ごはん行きたい" /></label>
           <label className="flex items-start gap-3 rounded-2xl border border-orange-100 bg-orange-50/70 p-4 text-sm"><input name="isAdult" type="checkbox" className="mt-1" /><span>20歳以上です<span className="block text-xs text-stone-500">お酒アイコンの扱いを安全にするため、正式版では年齢確認を強化してください。</span></span></label>
-          <label className="flex items-start gap-3 rounded-2xl border border-stone-200 bg-white p-4 text-sm"><input name="terms" type="checkbox" className="mt-1" required /><span>利用規約・プライバシーポリシーに同意します。<span className="block text-xs text-stone-500">このMVPでは仮文言です。ローンチ前に正式文面を作成してください。</span></span></label>
+          <label className="flex items-start gap-3 rounded-2xl border border-stone-200 bg-white p-4 text-sm">
+            <input name="terms" type="checkbox" className="mt-1" required />
+            <span><TransitionLink href="/terms" className="font-bold underline">利用規約</TransitionLink>・<TransitionLink href="/privacy" className="font-bold underline">プライバシーポリシー</TransitionLink>に同意します。</span>
+          </label>
           <SubmitButton pendingText="作成中..." className="w-full rounded-2xl bg-gradient-to-r from-orange-500 via-pink-500 to-violet-600 px-5 py-3 font-black text-white shadow-lg shadow-pink-100">作成する</SubmitButton>
         </form>
       </section>

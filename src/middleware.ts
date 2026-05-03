@@ -2,8 +2,44 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 const protectedPathPrefixes = ["/onboarding", "/mood", "/home", "/friends", "/profile", "/settings"];
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_POSTS = 45;
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+
+function getClientIp(request: NextRequest) {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  return forwardedFor?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "unknown";
+}
+
+function checkRateLimit(request: NextRequest) {
+  if (request.method === "GET" || request.method === "HEAD" || request.method === "OPTIONS") return null;
+
+  const now = Date.now();
+  const key = `${getClientIp(request)}:${request.nextUrl.pathname}:${request.method}`;
+  const current = rateLimitStore.get(key);
+
+  if (!current || current.resetAt <= now) {
+    rateLimitStore.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return null;
+  }
+
+  current.count += 1;
+  if (current.count > RATE_LIMIT_MAX_POSTS) {
+    return new NextResponse("Too Many Requests", {
+      status: 429,
+      headers: {
+        "Retry-After": String(Math.ceil((current.resetAt - now) / 1000))
+      }
+    });
+  }
+
+  return null;
+}
 
 export async function middleware(request: NextRequest) {
+  const rateLimitedResponse = checkRateLimit(request);
+  if (rateLimitedResponse) return rateLimitedResponse;
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -49,5 +85,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"]
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|robots.txt|ads.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"]
 };
