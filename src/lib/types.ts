@@ -1,3 +1,5 @@
+import type { ViewMode } from "@/lib/viewMode";
+
 export type Profile = {
   id: string;
   member_code: string;
@@ -5,6 +7,7 @@ export type Profile = {
   tagline: string;
   avatar_url: string | null;
   is_adult: boolean;
+  display_mode?: ViewMode | null;
   terms_agreed_at: string;
   created_at: string;
   updated_at: string;

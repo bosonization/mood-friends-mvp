@@ -3,10 +3,12 @@ import { AppShell } from "@/components/AppShell";
 import { Avatar } from "@/components/Avatar";
 import { CopyButton } from "@/components/CopyButton";
 import { FormMessage } from "@/components/FormMessage";
+import { FriendsMoodDisplay, type FriendMoodViewItem } from "@/components/FriendsMoodDisplay";
 import { getMood } from "@/lib/moods";
 import { formatRelativeTime } from "@/lib/safety";
 import { formatRemainingTime, getMoodFreshness, isMoodSessionActive } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
+import { normalizeViewMode } from "@/lib/viewMode";
 import type { Friendship, MoodStatus, Profile } from "@/lib/types";
 
 type HomePageProps = { searchParams: Promise<{ message?: string }> };
@@ -23,63 +25,48 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const { data: myMood } = await supabase.from("mood_statuses").select("*").eq("user_id", user.id).maybeSingle<MoodStatus>();
   if (!isMoodSessionActive(myMood)) redirect("/mood");
 
-  const { data: friendships } = await supabase.from("friendships").select("*").eq("status", "accepted").or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`).returns<Friendship[]>();
+  const { data: friendships } = await supabase
+    .from("friendships")
+    .select("*")
+    .eq("status", "accepted")
+    .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+    .returns<Friendship[]>();
+
   const friendIds = friendships?.map((friendship) => friendship.requester_id === user.id ? friendship.addressee_id : friendship.requester_id) ?? [];
-  const { data: friendProfiles } = friendIds.length ? await supabase.from("profiles").select("*").in("id", friendIds).returns<Profile[]>() : { data: [] as Profile[] };
-  const { data: friendMoods } = friendIds.length ? await supabase.from("mood_statuses").select("*").in("user_id", friendIds).returns<MoodStatus[]>() : { data: [] as MoodStatus[] };
+  const { data: friendProfiles } = friendIds.length
+    ? await supabase.from("profiles").select("*").in("id", friendIds).returns<Profile[]>()
+    : { data: [] as Profile[] };
+  const { data: friendMoods } = friendIds.length
+    ? await supabase.from("mood_statuses").select("*").in("user_id", friendIds).returns<MoodStatus[]>()
+    : { data: [] as MoodStatus[] };
 
   const moodByUser = new Map((friendMoods ?? []).map((mood) => [mood.user_id, mood]));
   const currentMood = getMood(myMood?.mood_key);
+  const friendsForView: FriendMoodViewItem[] = (friendProfiles ?? []).map((friend) => {
+    const friendMood = moodByUser.get(friend.id);
+    const mood = getMood(friendMood?.mood_key);
+    const active = isMoodSessionActive(friendMood);
+
+    return {
+      id: friend.id,
+      handleName: friend.handle_name,
+      tagline: friend.tagline,
+      avatarUrl: friend.avatar_url,
+      moodIcon: mood?.icon ?? null,
+      moodLabel: mood?.label ?? null,
+      moodDescription: mood?.description ?? null,
+      lastLoginAt: friendMood?.last_login_at ?? null,
+      relativeTime: formatRelativeTime(friendMood?.last_login_at),
+      remainingTime: active ? formatRemainingTime(friendMood) : null,
+      active,
+      freshness: getMoodFreshness(friendMood?.last_login_at)
+    };
+  });
 
   return (
     <AppShell>
       <div className="space-y-6">
-        <section className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
-          <div className="flex items-end justify-between gap-4">
-            <div><p className="text-sm font-bold text-pink-700">Friends</p><h2 className="text-2xl font-black">友達の今</h2></div>
-            <p className="text-sm text-stone-500">{friendProfiles?.length ?? 0}人</p>
-          </div>
-
-          {friendProfiles && friendProfiles.length > 0 ? (
-            <div className="mt-5 space-y-3">
-              {friendProfiles.map((friend) => {
-                const friendMood = moodByUser.get(friend.id);
-                const mood = getMood(friendMood?.mood_key);
-                const active = isMoodSessionActive(friendMood);
-                const freshness = getMoodFreshness(friendMood?.last_login_at);
-                const accent = freshness === "hot"
-                  ? "border-red-200 bg-red-50/90 shadow-red-100"
-                  : freshness === "fresh"
-                    ? "border-emerald-200 bg-emerald-50/90 shadow-emerald-100"
-                    : "border-stone-100 bg-white shadow-sm";
-                const timeBadge = freshness === "hot"
-                  ? "bg-red-500 text-white"
-                  : freshness === "fresh"
-                    ? "bg-emerald-500 text-white"
-                    : "bg-stone-100 text-stone-500";
-
-                return (
-                  <article key={friend.id} className={`flex items-center gap-3 rounded-3xl border p-4 shadow-sm ${accent}`}>
-                    <Avatar src={friend.avatar_url} name={friend.handle_name} />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="truncate font-bold">{friend.handle_name}</h3>
-                        {friend.tagline ? <span className="rounded-full bg-white/75 px-2 py-1 text-xs text-stone-700">{friend.tagline}</span> : null}
-                      </div>
-                      <p className="mt-1 text-sm font-bold text-stone-700">{mood ? `${mood.icon} ${mood.label}` : "まだ気分未登録"}</p>
-                    </div>
-                    <div className="shrink-0 text-right">
-                      <p className={`rounded-full px-3 py-1 text-xs font-black ${timeBadge}`}>{formatRelativeTime(friendMood?.last_login_at)}</p>
-                      {active ? <p className="mt-1 text-[11px] text-stone-500">残り {formatRemainingTime(friendMood)}</p> : null}
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="mt-6 rounded-3xl border border-dashed border-orange-200 p-5 text-sm leading-6 text-stone-600">まだ友達がいません。友達ページで会員コードから申請できます。</p>
-          )}
-        </section>
+        <FriendsMoodDisplay items={friendsForView} initialViewMode={normalizeViewMode(profile.display_mode)} />
 
         <section className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
           <div className="flex items-center gap-4">
