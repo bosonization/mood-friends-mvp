@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { Avatar } from "@/components/Avatar";
 import { CopyButton } from "@/components/CopyButton";
+import { ShareInviteButton } from "@/components/ShareInviteButton";
 import { FormMessage } from "@/components/FormMessage";
 import { FriendsMoodDisplay, type FriendMoodViewItem } from "@/components/FriendsMoodDisplay";
 import { getMood } from "@/lib/moods";
@@ -66,14 +67,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   return (
     <AppShell>
       <div className="space-y-6">
-        <FriendsMoodDisplay items={friendsForView} initialViewMode={normalizeViewMode(profile.display_mode)} />
+        <FriendsMoodDisplay items={friendsForView} initialViewMode={normalizeViewMode(profile.display_mode)} inviteCode={profile.member_code} ownerName={profile.handle_name} />
 
         <section className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
           <div className="flex items-center gap-4">
             <Avatar src={profile.avatar_url} name={profile.handle_name} size="lg" />
             <div className="min-w-0 flex-1">
               <p className="text-sm text-stone-500">あなたの会員コード</p>
-              <div className="mt-1 flex flex-wrap items-center gap-2"><p className="font-mono text-2xl font-black tracking-widest">{profile.member_code}</p><CopyButton value={profile.member_code} /></div>
+              <div className="mt-1 flex flex-wrap items-center gap-2"><p className="font-mono text-2xl font-black tracking-widest">{profile.member_code}</p><CopyButton value={profile.member_code} /><ShareInviteButton memberCode={profile.member_code} handleName={profile.handle_name} /></div>
               <p className="mt-1 text-sm text-stone-600">{profile.tagline || "一言未設定"}</p>
             </div>
           </div>

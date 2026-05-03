@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { TransitionLink } from "@/components/TransitionLink";
+import { FriendlessStarter } from "@/components/FriendlessStarter";
 import type { ViewMode } from "@/lib/viewMode";
 
 export type FriendMoodViewItem = {
@@ -22,6 +23,8 @@ export type FriendMoodViewItem = {
 type FriendsMoodDisplayProps = {
   items: FriendMoodViewItem[];
   initialViewMode: ViewMode;
+  inviteCode?: string;
+  ownerName?: string;
 };
 
 type BubbleSize = "large" | "medium" | "small";
@@ -149,7 +152,7 @@ function formatCompactTime(input: string | null | undefined, fallback: string) {
   return fallback;
 }
 
-export function FriendsMoodDisplay({ items, initialViewMode }: FriendsMoodDisplayProps) {
+export function FriendsMoodDisplay({ items, initialViewMode, inviteCode, ownerName }: FriendsMoodDisplayProps) {
   const sortedItems = useMemo(() => {
     return [...items].sort((a, b) => {
       const freshnessDiff = getFreshnessRank(a.freshness) - getFreshnessRank(b.freshness);
@@ -168,9 +171,7 @@ export function FriendsMoodDisplay({ items, initialViewMode }: FriendsMoodDispla
           </div>
           <p className="text-sm text-stone-500">0人</p>
         </div>
-        <p className="mt-6 rounded-3xl border border-dashed border-orange-200 p-5 text-sm leading-6 text-stone-600">
-          まだ友達がいません。友達ページで会員コードから申請できます。
-        </p>
+        <FriendlessStarter inviteCode={inviteCode} ownerName={ownerName} />
       </section>
     );
   }

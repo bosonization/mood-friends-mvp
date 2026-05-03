@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { CopyButton } from "@/components/CopyButton";
+import { ShareInviteButton } from "@/components/ShareInviteButton";
 import { FormMessage } from "@/components/FormMessage";
 import { SubmitButton } from "@/components/SubmitButton";
 import { TransitionLink } from "@/components/TransitionLink";
@@ -26,9 +27,11 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
       <section className="mx-auto max-w-2xl space-y-5">
         <div className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
           <p className="text-sm font-bold text-pink-700">Settings</p><h1 className="text-2xl font-black">設定</h1>
-          <div className="mt-5 rounded-[1.7rem] bg-stone-950 p-5 text-white"><p className="text-sm text-stone-300">会員コード</p><div className="mt-2 flex flex-wrap items-center gap-3"><p className="font-mono text-3xl font-black tracking-widest">{profile.member_code}</p><CopyButton value={profile.member_code} /></div></div>
+          <div className="mt-5 rounded-[1.7rem] bg-stone-950 p-5 text-white"><p className="text-sm text-stone-300">会員コード</p><div className="mt-2 flex flex-wrap items-center gap-3"><p className="font-mono text-3xl font-black tracking-widest">{profile.member_code}</p><CopyButton value={profile.member_code} /><ShareInviteButton memberCode={profile.member_code} handleName={profile.handle_name} /></div></div>
           <div className="mt-5"><FormMessage message={params.message} /></div>
         </div>
+
+        <ShareInviteButton memberCode={profile.member_code} handleName={profile.handle_name} variant="card" />
 
         <div className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
           <h2 className="text-xl font-black">友達の今の表示形式</h2>
