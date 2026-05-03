@@ -27,8 +27,5 @@ export function formatRelativeTime(input: string | null | undefined) {
   const diffDays = Math.floor(diffHours / 24);
   if (diffDays < 7) return `${diffDays}日前`;
 
-  return date.toLocaleDateString("ja-JP", {
-    month: "short",
-    day: "numeric"
-  });
+  return date.toLocaleDateString("ja-JP", { month: "short", day: "numeric" });
 }

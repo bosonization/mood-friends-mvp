@@ -1,6 +1,6 @@
 {
   "name": "emoodition-mvp",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "MVP for eMoodition: a friend-only mood session sharing app.",
   "scripts": {

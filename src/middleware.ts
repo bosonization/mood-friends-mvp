@@ -1,14 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const protectedPathPrefixes = [
-  "/onboarding",
-  "/mood",
-  "/home",
-  "/friends",
-  "/profile",
-  "/settings"
-];
+const protectedPathPrefixes = ["/onboarding", "/mood", "/home", "/friends", "/profile", "/settings"];
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -36,13 +29,8 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
-  const isProtected = protectedPathPrefixes.some((path) =>
-    request.nextUrl.pathname.startsWith(path)
-  );
+  const { data: { user } } = await supabase.auth.getUser();
+  const isProtected = protectedPathPrefixes.some((path) => request.nextUrl.pathname.startsWith(path));
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone();

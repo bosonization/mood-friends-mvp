@@ -1,5 +1,5 @@
 -- eMoodition update migration for an existing mood-friends-mvp Supabase project.
--- Run this once in Supabase SQL Editor.
+-- Run this only if your project does not yet have mood session columns or avatars bucket.
 
 alter table public.mood_statuses
   add column if not exists session_started_at timestamptz,
@@ -41,7 +41,7 @@ on conflict (id) do update set
   file_size_limit = excluded.file_size_limit,
   allowed_mime_types = excluded.allowed_mime_types;
 
--- storage.objects is managed by Supabase Storage. Do not ALTER it here; hosted projects may return ERROR 42501.
+-- If policies fail with ERROR 42501, create these policies from Supabase Storage > Policies UI.
 
 drop policy if exists "avatars_public_read" on storage.objects;
 create policy "avatars_public_read"

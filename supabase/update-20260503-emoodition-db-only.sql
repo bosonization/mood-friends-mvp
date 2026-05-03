@@ -1,5 +1,4 @@
--- eMoodition DB-only migration. Run this if Storage policy SQL returns ERROR 42501.
--- Then create the avatars bucket and Storage policies from the Supabase Dashboard UI.
+-- DB-only migration. Use if Storage policy SQL returns ERROR 42501.
 
 alter table public.mood_statuses
   add column if not exists session_started_at timestamptz,

@@ -14,14 +14,7 @@ export function Avatar({ src, name, size = "md" }: AvatarProps) {
   const initial = name.trim().slice(0, 1) || "？";
 
   if (src) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={src}
-        alt={`${name}のアイコン`}
-        className={`${sizeClass[size]} rounded-full border border-white object-cover shadow-sm`}
-      />
-    );
+    return <img src={src} alt={`${name}のアイコン`} className={`${sizeClass[size]} rounded-full border border-white object-cover shadow-sm`} />;
   }
 
   return (

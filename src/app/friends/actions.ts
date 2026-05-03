@@ -19,7 +19,6 @@ export async function requestFriend(formData: FormData) {
   const supabase = await createClient();
   const memberCode = normalizeMemberCode(String(formData.get("memberCode") ?? ""));
   const { data, error } = await supabase.rpc("request_friend_by_code", { target_code: memberCode });
-
   if (error) redirect(`/friends?message=${encodeURIComponent("友達申請に失敗しました。")}`);
   redirect(`/friends?message=${encodeURIComponent(messageMap[String(data)] ?? "処理しました。")}`);
 }

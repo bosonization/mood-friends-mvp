@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { LoadingOverlay } from "@/components/LoadingOverlay";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -13,7 +14,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ja">
-      <body>{children}</body>
+      <body>
+        <LoadingOverlay />
+        {children}
+      </body>
     </html>
   );
 }

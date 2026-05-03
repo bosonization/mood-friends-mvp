@@ -17,9 +17,7 @@ export async function createProfile(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  if (formData.get("terms") !== "on") {
-    redirect(`/onboarding?message=${encodeURIComponent("利用規約への同意が必要です")}`);
-  }
+  if (formData.get("terms") !== "on") redirect(`/onboarding?message=${encodeURIComponent("利用規約への同意が必要です")}`);
 
   const parsed = schema.safeParse({
     handleName: String(formData.get("handleName") ?? ""),
@@ -27,29 +25,13 @@ export async function createProfile(formData: FormData) {
     avatarUrl: String(formData.get("avatarUrl") ?? ""),
     isAdult: formData.get("isAdult") === "on"
   });
-
-  if (!parsed.success) {
-    redirect(`/onboarding?message=${encodeURIComponent(parsed.error.issues[0]?.message ?? "入力内容を確認してください")}`);
-  }
+  if (!parsed.success) redirect(`/onboarding?message=${encodeURIComponent(parsed.error.issues[0]?.message ?? "入力内容を確認してください")}`);
 
   const { handleName, tagline, avatarUrl, isAdult } = parsed.data;
-  if (hasContactLikeText(handleName) || hasContactLikeText(tagline)) {
-    redirect(`/onboarding?message=${encodeURIComponent("連絡先や外部IDのような文字列は入れられません。")}`);
-  }
+  if (hasContactLikeText(handleName) || hasContactLikeText(tagline)) redirect(`/onboarding?message=${encodeURIComponent("連絡先や外部IDのような文字列は入れられません。")}`);
 
-  const { error } = await supabase.from("profiles").upsert({
-    id: user.id,
-    handle_name: handleName,
-    tagline,
-    avatar_url: avatarUrl || null,
-    is_adult: isAdult,
-    terms_agreed_at: new Date().toISOString(),
-    deleted_at: null
-  });
-
-  if (error) {
-    redirect(`/onboarding?message=${encodeURIComponent("プロフィール作成に失敗しました。")}`);
-  }
+  const { error } = await supabase.from("profiles").upsert({ id: user.id, handle_name: handleName, tagline, avatar_url: avatarUrl || null, is_adult: isAdult, terms_agreed_at: new Date().toISOString(), deleted_at: null });
+  if (error) redirect(`/onboarding?message=${encodeURIComponent("プロフィール作成に失敗しました。")}`);
 
   await supabase.from("terms_consents").insert({ user_id: user.id, terms_version: "2026-05-03" });
   redirect("/mood");

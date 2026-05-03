@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/browser";
 import { Avatar } from "@/components/Avatar";
+import { startGlobalLoading } from "@/components/LoadingOverlay";
 
 type AvatarUploaderProps = {
   name: string;
@@ -26,7 +27,6 @@ export function AvatarUploader({ name, currentUrl, handleName }: AvatarUploaderP
       setMessage("png / jpg / webp / gif の画像を選んでください。");
       return;
     }
-
     if (file.size > MAX_FILE_SIZE) {
       setMessage("画像は2MB以下にしてください。");
       return;
@@ -34,13 +34,10 @@ export function AvatarUploader({ name, currentUrl, handleName }: AvatarUploaderP
 
     setUploading(true);
     setMessage(null);
+    startGlobalLoading();
 
     const supabase = createClient();
-    const {
-      data: { user },
-      error: userError
-    } = await supabase.auth.getUser();
-
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
       setMessage("ログイン情報を確認できませんでした。");
       setUploading(false);
@@ -51,11 +48,7 @@ export function AvatarUploader({ name, currentUrl, handleName }: AvatarUploaderP
     const safeName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
     const path = `${user.id}/${safeName}`;
 
-    const { error } = await supabase.storage.from("avatars").upload(path, file, {
-      cacheControl: "3600",
-      upsert: true
-    });
-
+    const { error } = await supabase.storage.from("avatars").upload(path, file, { cacheControl: "3600", upsert: true });
     if (error) {
       setMessage(`アップロードに失敗しました: ${error.message}`);
       setUploading(false);
@@ -75,14 +68,11 @@ export function AvatarUploader({ name, currentUrl, handleName }: AvatarUploaderP
         <Avatar src={url} name={handleName || "user"} size="lg" />
         <div className="flex-1">
           <label className="inline-flex cursor-pointer rounded-2xl bg-stone-950 px-4 py-3 text-sm font-bold text-white hover:bg-stone-800">
-            {uploading ? "アップロード中..." : "画像をアップロード"}
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/webp,image/gif"
-              className="hidden"
-              onChange={handleChange}
-              disabled={uploading}
-            />
+            <span className="inline-flex items-center gap-2">
+              {uploading ? <span className="h-4 w-4 rounded-full border-2 border-white/50 border-t-white emoodition-spinner" /> : null}
+              {uploading ? "アップロード中..." : "画像をアップロード"}
+            </span>
+            <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden" onChange={handleChange} disabled={uploading} />
           </label>
           <p className="mt-2 text-xs leading-5 text-stone-500">最大2MB。プロフィール保存で反映されます。</p>
         </div>
