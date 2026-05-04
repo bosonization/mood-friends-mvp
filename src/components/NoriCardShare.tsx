@@ -8,6 +8,8 @@ type NoriCardShareProps = {
   moodIcon: string;
   moodLabel: string;
   moodDescription: string;
+  remainingTime?: string | null;
+  spotlightActive?: boolean;
 };
 
 type InvitePayload = {
@@ -28,7 +30,7 @@ function getInviteUrl(token: string) {
   return `${window.location.origin}/invite/${token}`;
 }
 
-export function NoriCardShare({ memberCode, handleName, moodIcon, moodLabel, moodDescription }: NoriCardShareProps) {
+export function NoriCardShare({ memberCode, handleName, moodIcon, moodLabel, moodDescription, remainingTime, spotlightActive }: NoriCardShareProps) {
   const [creating, setCreating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
@@ -107,7 +109,9 @@ export function NoriCardShare({ memberCode, handleName, moodIcon, moodLabel, moo
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-pink-600">Nori Card</p>
-              {expiresAt ? <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-black text-stone-500">期限 {formatExpiresAt(expiresAt)}</span> : null}
+              {remainingTime ? <span className="rounded-full bg-gradient-to-r from-orange-500 via-pink-500 to-violet-600 px-2.5 py-1 text-[10px] font-black text-white shadow-sm">変更まで {remainingTime}</span> : null}
+              {spotlightActive ? <span className="rounded-full bg-fuchsia-50 px-2 py-0.5 text-[10px] font-black text-fuchsia-700">✨ Spotlight</span> : null}
+              {expiresAt ? <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-black text-stone-500">招待期限 {formatExpiresAt(expiresAt)}</span> : null}
             </div>
             <h2 className="mt-1 truncate text-lg font-black">{moodLabel}</h2>
             <p className="mt-0.5 line-clamp-1 text-xs text-stone-600 sm:line-clamp-2">{moodDescription}</p>

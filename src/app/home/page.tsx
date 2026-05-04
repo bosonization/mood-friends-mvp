@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
-import { Avatar } from "@/components/Avatar";
 import { FirstLinkCelebration } from "@/components/FirstLinkCelebration";
 import { FirstLinkChallenge } from "@/components/FirstLinkChallenge";
 import { FormMessage } from "@/components/FormMessage";
@@ -119,28 +118,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             moodIcon={currentMood.icon}
             moodLabel={currentMood.label}
             moodDescription={currentMood.description}
+            remainingTime={formatRemainingTime(myMood)}
+            spotlightActive={Boolean(mySpotlight)}
           />
         ) : null}
 
-        <FriendsMoodDisplay items={friendsForView} initialViewMode={normalizeViewMode(profile.display_mode)} inviteCode={profile.member_code} ownerName={profile.handle_name} />
+        <div className="-mt-2"><FormMessage message={params.message} /></div>
 
-        <section className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
-          <div className="flex items-center gap-4">
-            <Avatar src={profile.avatar_url} name={profile.handle_name} size="lg" />
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-black text-pink-700">あなたの今</p>
-              <div className="mt-3 flex flex-wrap items-center gap-3">
-                <span className="text-5xl">{currentMood?.icon}</span>
-                <div>
-                  <h2 className="text-2xl font-black">{currentMood?.label}</h2>
-                  <p className="text-sm text-stone-500">変更まであと {formatRemainingTime(myMood)}</p>
-                </div>
-              </div>
-              {mySpotlight ? <p className="mt-3 inline-flex rounded-full bg-fuchsia-50 px-3 py-1 text-xs font-black text-fuchsia-700">✨ Spotlight中</p> : null}
-            </div>
-          </div>
-          <div className="mt-5"><FormMessage message={params.message} /></div>
-        </section>
+        <FriendsMoodDisplay items={friendsForView} initialViewMode={normalizeViewMode(profile.display_mode)} inviteCode={profile.member_code} ownerName={profile.handle_name} />
       </div>
     </AppShell>
   );
