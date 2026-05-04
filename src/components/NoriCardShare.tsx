@@ -95,56 +95,50 @@ export function NoriCardShare({ memberCode, handleName, moodIcon, moodLabel, moo
     }
   }
 
-  const qrUrl = inviteUrl ? `https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=14&data=${encodeURIComponent(inviteUrl)}` : null;
+  const qrUrl = inviteUrl ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=12&data=${encodeURIComponent(inviteUrl)}` : null;
 
   return (
-    <section className="overflow-hidden rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-sm font-black text-pink-700">Nori Card</p>
-          <h2 className="mt-1 text-2xl font-black">このノリを友達に見せる</h2>
-          <p className="mt-2 max-w-xl text-sm leading-6 text-stone-600">
-            ただの招待ではなく、今置いているノリをきっかけに送れます。リンクは24時間有効で、登録後は自動で友達になります。
-          </p>
-        </div>
-        {expiresAt ? <p className="rounded-full bg-stone-100 px-3 py-2 text-xs font-black text-stone-600">期限 {formatExpiresAt(expiresAt)}</p> : null}
-      </div>
-
-      <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_220px]">
-        <div className="rounded-[1.6rem] border border-orange-100 bg-gradient-to-br from-orange-50 via-pink-50 to-white p-5 shadow-inner">
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-stone-400">今このノリ</p>
-          <div className="mt-4 flex items-center gap-4">
-            <div className="grid h-20 w-20 shrink-0 place-items-center rounded-[1.6rem] bg-white text-5xl shadow-lg shadow-orange-100">{moodIcon}</div>
-            <div className="min-w-0">
-              <h3 className="text-2xl font-black">{moodLabel}</h3>
-              <p className="mt-1 text-sm leading-6 text-stone-600">{moodDescription}</p>
-            </div>
+    <section className="overflow-hidden rounded-[1.7rem] border border-white/70 bg-white/85 p-4 shadow-sm backdrop-blur-xl">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-orange-50 via-pink-50 to-white text-4xl shadow-sm shadow-orange-100">
+            {moodIcon}
           </div>
-          <p className="mt-4 rounded-2xl bg-white/75 px-4 py-3 text-sm leading-6 text-stone-600">
-            「アプリ使って」ではなく、「今このノリ置いてる」を友達に送る導線です。
-          </p>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-pink-600">Nori Card</p>
+              {expiresAt ? <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-black text-stone-500">期限 {formatExpiresAt(expiresAt)}</span> : null}
+            </div>
+            <h2 className="mt-1 truncate text-lg font-black">{moodLabel}</h2>
+            <p className="mt-0.5 line-clamp-1 text-xs text-stone-600 sm:line-clamp-2">{moodDescription}</p>
+          </div>
         </div>
 
-        <div className="rounded-[1.6rem] border border-white/70 bg-stone-950 p-4 text-white shadow-lg">
-          <p className="text-sm font-black text-stone-300">QR招待</p>
-          {showQr && qrUrl ? (
-            <div className="mt-3 rounded-2xl bg-white p-3">
-              <img src={qrUrl} alt="eMoodition招待QR" className="mx-auto h-44 w-44" />
-            </div>
-          ) : (
-            <div className="mt-3 grid h-44 place-items-center rounded-2xl border border-white/10 bg-white/5 text-center text-sm text-stone-400">
-              友達と一緒にいる時は<br />QRでその場登録
-            </div>
-          )}
-          <p className="mt-3 text-xs leading-5 text-stone-400">このQRも24時間有効です。</p>
+        <div className="grid shrink-0 grid-cols-3 gap-1.5 text-xs font-black sm:w-[220px]">
+          <button type="button" disabled={creating} onClick={shareNoriCard} className="rounded-xl bg-gradient-to-r from-orange-500 via-pink-500 to-violet-600 px-3 py-2.5 text-white shadow-sm disabled:opacity-55">
+            {creating ? "作成中" : "共有"}
+          </button>
+          <button type="button" disabled={creating} onClick={toggleQr} className="rounded-xl bg-stone-950 px-3 py-2.5 text-white shadow-sm disabled:opacity-55">
+            QR
+          </button>
+          <button type="button" disabled={creating} onClick={copyNoriCard} className="rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-stone-800 shadow-sm disabled:opacity-55">
+            {copied ? "済" : "コピー"}
+          </button>
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-2 text-sm font-black">
-        <button type="button" disabled={creating} onClick={shareNoriCard} className="rounded-2xl bg-gradient-to-r from-orange-500 via-pink-500 to-violet-600 px-4 py-3 text-white shadow-lg shadow-pink-100 disabled:opacity-55">{creating ? "作成中" : "共有"}</button>
-        <button type="button" disabled={creating} onClick={toggleQr} className="rounded-2xl bg-stone-950 px-4 py-3 text-white shadow-sm disabled:opacity-55">QR</button>
-        <button type="button" disabled={creating} onClick={copyNoriCard} className="rounded-2xl border border-stone-200 bg-white px-4 py-3 text-stone-800 shadow-sm disabled:opacity-55">{copied ? "コピー済み" : "コピー"}</button>
-      </div>
+      {showQr && qrUrl ? (
+        <div className="mt-3 flex flex-col gap-3 rounded-[1.35rem] border border-stone-100 bg-stone-950 p-3 text-white sm:flex-row sm:items-center">
+          <div className="mx-auto rounded-2xl bg-white p-2 sm:mx-0">
+            <img src={qrUrl} alt="eMoodition招待QR" className="h-32 w-32" />
+          </div>
+          <div className="min-w-0 text-center sm:text-left">
+            <p className="text-sm font-black">QR招待</p>
+            <p className="mt-1 text-xs leading-5 text-stone-300">友達と一緒にいる時は、このQRを見せるだけ。登録後に自動で友達になります。</p>
+            {expiresAt ? <p className="mt-1 text-[11px] text-stone-400">期限 {formatExpiresAt(expiresAt)}</p> : null}
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
