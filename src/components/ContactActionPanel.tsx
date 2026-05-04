@@ -17,22 +17,14 @@ function buildMessage({ handleName, moodLabel, moodIcon, relativeTime }: Contact
 
 export function ContactActionPanel(props: ContactActionPanelProps) {
   const [copied, setCopied] = useState(false);
-  const [phoneCopied, setPhoneCopied] = useState(false);
-
   const message = useMemo(() => buildMessage(props), [props]);
   const encodedMessage = encodeURIComponent(message);
-  const encodedSubject = encodeURIComponent("eMooditionで見たよ");
 
-  async function copyText(text: string, type: "message" | "phone") {
+  async function copyMessage() {
     try {
-      await navigator.clipboard.writeText(text);
-      if (type === "phone") {
-        setPhoneCopied(true);
-        window.setTimeout(() => setPhoneCopied(false), 1400);
-      } else {
-        setCopied(true);
-        window.setTimeout(() => setCopied(false), 1400);
-      }
+      await navigator.clipboard.writeText(message);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1400);
     } catch {
       alert("コピーできませんでした。手動で選択してください。");
     }
@@ -48,11 +40,7 @@ export function ContactActionPanel(props: ContactActionPanelProps) {
       }
     }
 
-    await copyText(message, "message");
-  }
-
-  async function handlePhoneGuide() {
-    await copyText(props.handleName, "phone");
+    await copyMessage();
   }
 
   return (
@@ -65,7 +53,7 @@ export function ContactActionPanel(props: ContactActionPanelProps) {
         {copied ? <span className="rounded-full bg-stone-950 px-2 py-1 text-[10px] font-black text-white">コピー済み</span> : null}
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-2 text-center text-[12px] font-black sm:grid-cols-3 xl:grid-cols-2">
+      <div className="mt-3 grid grid-cols-2 gap-2 text-center text-[12px] font-black">
         <button
           type="button"
           onClick={handleShare}
@@ -87,22 +75,9 @@ export function ContactActionPanel(props: ContactActionPanelProps) {
         >
           SMS
         </a>
-        <a
-          href={`mailto:?subject=${encodedSubject}&body=${encodedMessage}`}
-          className="rounded-2xl bg-gradient-to-r from-orange-400 to-pink-500 px-3 py-3 text-white shadow-lg shadow-orange-100 transition hover:scale-[1.02]"
-        >
-          メール
-        </a>
         <button
           type="button"
-          onClick={handlePhoneGuide}
-          className="rounded-2xl border border-stone-200 bg-white px-3 py-3 text-stone-800 shadow-sm transition hover:scale-[1.02] hover:bg-stone-50"
-        >
-          {phoneCopied ? "名前コピー済み" : "電話"}
-        </button>
-        <button
-          type="button"
-          onClick={() => copyText(message, "message")}
+          onClick={copyMessage}
           className="rounded-2xl border border-stone-200 bg-white px-3 py-3 text-stone-800 shadow-sm transition hover:scale-[1.02] hover:bg-stone-50"
         >
           文面コピー
