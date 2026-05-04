@@ -1,9 +1,12 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { Avatar } from "@/components/Avatar";
+import { FirstLinkCelebration } from "@/components/FirstLinkCelebration";
+import { FirstLinkChallenge } from "@/components/FirstLinkChallenge";
 import { FormMessage } from "@/components/FormMessage";
 import { FriendsMoodDisplay, type FriendMoodViewItem } from "@/components/FriendsMoodDisplay";
 import { LevelCard } from "@/components/LevelCard";
+import { NoriCardShare } from "@/components/NoriCardShare";
 import { getMood } from "@/lib/moods";
 import { formatRelativeTime } from "@/lib/safety";
 import { formatRemainingTime, getMoodFreshness, isMoodSessionActive } from "@/lib/session";
@@ -95,6 +98,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   return (
     <AppShell>
+      <FirstLinkCelebration friendCount={levelStatus.friendCount} level={levelStatus.level} />
+
       <div className="space-y-6">
         <LevelCard
           status={levelStatus}
@@ -104,6 +109,18 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           spotlightActive={Boolean(mySpotlight)}
           spotlightUsedToday={Boolean(todaySpotlight)}
         />
+
+        <FirstLinkChallenge friendCount={levelStatus.friendCount} memberCode={profile.member_code} handleName={profile.handle_name} />
+
+        {currentMood ? (
+          <NoriCardShare
+            memberCode={profile.member_code}
+            handleName={profile.handle_name}
+            moodIcon={currentMood.icon}
+            moodLabel={currentMood.label}
+            moodDescription={currentMood.description}
+          />
+        ) : null}
 
         <FriendsMoodDisplay items={friendsForView} initialViewMode={normalizeViewMode(profile.display_mode)} inviteCode={profile.member_code} ownerName={profile.handle_name} />
 
