@@ -32,9 +32,9 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
           <div className="rounded-2xl border border-orange-100 bg-orange-50/70 p-4 text-sm">
             <p className="font-bold">年齢区分</p>
-            <p className="mt-1 text-xs leading-5 text-stone-500">20歳未満には、お酒に関する表示はカフェとして安全に表示されます。</p>
+            <p className="mt-1 text-xs leading-5 text-stone-500">20歳未満の場合、「飲み」は選べません。</p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-white bg-white/75 p-3"><input name="ageGroup" value="adult20" type="radio" className="mt-1" defaultChecked={profile.is_adult} /><span><span className="block font-bold">20歳以上</span><span className="text-xs text-stone-500">お酒表示が使えます</span></span></label>
+              <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-white bg-white/75 p-3"><input name="ageGroup" value="adult20" type="radio" className="mt-1" defaultChecked={profile.is_adult} /><span><span className="block font-bold">20歳以上</span><span className="text-xs text-stone-500">「飲み」が選べます</span></span></label>
               <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-white bg-white/75 p-3"><input name="ageGroup" value="under20" type="radio" className="mt-1" defaultChecked={!profile.is_adult} /><span><span className="block font-bold">20歳未満</span><span className="text-xs text-stone-500">「飲み」は選べません</span></span></label>
             </div>
           </div>
