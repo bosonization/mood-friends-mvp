@@ -26,8 +26,8 @@ export function ShareInviteButton({ memberCode, handleName, variant = "compact" 
   }, [memberCode]);
 
   const shareText = useMemo(() => {
-    const from = handleName ? `${handleName}から` : "";
-    return `${from}eMooditionの招待です。会員コード: ${memberCode}`;
+    const from = handleName ? `${handleName}さんから` : "";
+    return `${from}eMooditionに招待しています。\n友達の「今どんなノリ？」がわかるアプリです。\n会員コード: ${memberCode}`;
   }, [handleName, memberCode]);
 
   async function copyInvite() {
@@ -70,7 +70,7 @@ export function ShareInviteButton({ memberCode, handleName, variant = "compact" 
           <div>
             <p className="text-sm font-black text-pink-700">Invite</p>
             <h3 className="mt-1 text-xl font-black">友達を招待</h3>
-            <p className="mt-2 text-sm leading-6 text-stone-600">URLとあなたの会員コードを一緒に共有します。LINE、SMS、Instagram DMなどはスマホの共有シートから送れます。</p>
+            <p className="mt-2 text-sm leading-6 text-stone-600">友達の「今どんなノリ？」がわかるアプリです。URLとあなたの会員コードを一緒に共有します。</p>
           </div>
           <div className="rounded-2xl bg-stone-950 px-4 py-3 text-white"><p className="text-[10px] font-black uppercase tracking-[0.22em] text-stone-400">Code</p><p className="font-mono text-lg font-black tracking-widest">{memberCode}</p></div>
         </div>
