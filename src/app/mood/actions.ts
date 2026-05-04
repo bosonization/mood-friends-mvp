@@ -28,20 +28,20 @@ export async function startMoodSession(formData: FormData) {
     .maybeSingle<{ session_expires_at: string }>();
 
   if (isMoodSessionActive(current)) {
-    redirect(`/home?message=${encodeURIComponent("現在の気分セッション中は変更できません。")}`);
+    redirect(`/home?message=${encodeURIComponent("今のノリはまだ変更できません。")}`);
   }
 
   const moodKey = String(formData.get("moodKey") ?? "") as MoodKey;
   if (!isMoodKey(moodKey)) {
-    redirect(`/mood?message=${encodeURIComponent("気分を選択してください。")}`);
+    redirect(`/mood?message=${encodeURIComponent("今のノリを選択してください。")}`);
   }
 
   if (!isMoodUnlocked(moodKey, levelStatus.level)) {
-    redirect(`/mood?message=${encodeURIComponent(`この気分はLv${levelStatus.level}ではまだ選べません。`)}`);
+    redirect(`/mood?message=${encodeURIComponent(`このノリはLv${levelStatus.level}ではまだ選べません。`)}`);
   }
 
   if (moodKey === "drink" && !profile.is_adult) {
-    redirect(`/mood?message=${encodeURIComponent("お酒アイコンを選ぶには、プロフィールで20歳以上にチェックしてください。")}`);
+    redirect(`/mood?message=${encodeURIComponent("飲みのノリは20歳以上で選べます。別のノリを選んでください。")}`);
   }
 
   const now = new Date();
@@ -60,7 +60,7 @@ export async function startMoodSession(formData: FormData) {
   );
 
   if (error) {
-    redirect(`/mood?message=${encodeURIComponent("気分の保存に失敗しました。")}`);
+    redirect(`/mood?message=${encodeURIComponent("今のノリの保存に失敗しました。")}`);
   }
 
   redirect("/home");

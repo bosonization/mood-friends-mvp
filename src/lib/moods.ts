@@ -9,7 +9,8 @@ export const MOODS = [
     key: "drink",
     icon: "🍺",
     label: "飲み",
-    description: "軽く飲みに行けるノリ"
+    description: "軽く飲みに行けるノリ",
+    adultOnly: true
   },
   {
     key: "movie",
@@ -50,13 +51,20 @@ export const MOODS = [
 ] as const;
 
 export type Mood = (typeof MOODS)[number];
+export type MoodOption = Mood;
+export type MoodDefinition = Mood;
 export type MoodKey = Mood["key"];
 
-export function isMoodKey(value: string): value is MoodKey {
+export function isMoodKey(value: string | null | undefined): value is MoodKey {
   return MOODS.some((mood) => mood.key === value);
 }
 
-export function getMood(key: string | null | undefined) {
-  if (!key) return null;
-  return MOODS.find((mood) => mood.key === key) ?? null;
+export function getMood(value: string | null | undefined): Mood | undefined {
+  if (!isMoodKey(value)) return undefined;
+  return MOODS.find((mood) => mood.key === value);
+}
+
+export function isAdultOnlyMood(value: string | null | undefined) {
+  const mood = getMood(value);
+  return Boolean(mood && "adultOnly" in mood && mood.adultOnly);
 }

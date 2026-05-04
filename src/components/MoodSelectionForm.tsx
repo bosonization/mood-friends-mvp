@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useFormStatus } from "react-dom";
 import type { MoodKey } from "@/lib/moods";
 import { MOODS } from "@/lib/moods";
@@ -11,10 +11,17 @@ import { SubmitButton } from "@/components/SubmitButton";
 type MoodSelectionFormProps = {
   previousMoodKey?: string | null;
   level: UserLevel;
+  isAdult: boolean;
 };
 
-export function MoodSelectionForm({ previousMoodKey, level }: MoodSelectionFormProps) {
-  const firstUnlocked = MOODS.find((mood) => isMoodUnlocked(mood.key, level));
+function isDrinkMood(key: string) {
+  return key === "drink";
+}
+
+export function MoodSelectionForm({ previousMoodKey, level, isAdult }: MoodSelectionFormProps) {
+  const firstUnlocked = useMemo(() => {
+    return MOODS.find((mood) => isMoodUnlocked(mood.key, level) && (isAdult || !isDrinkMood(mood.key)));
+  }, [level, isAdult]);
   const [selectedMoodKey, setSelectedMoodKey] = useState<MoodKey | "">(firstUnlocked?.key ?? "");
   const selectedMood = MOODS.find((mood) => mood.key === selectedMoodKey);
 
@@ -24,7 +31,9 @@ export function MoodSelectionForm({ previousMoodKey, level }: MoodSelectionFormP
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {MOODS.map((mood) => {
-          const unlocked = isMoodUnlocked(mood.key, level);
+          const levelUnlocked = isMoodUnlocked(mood.key, level);
+          const adultLocked = isDrinkMood(mood.key) && !isAdult;
+          const unlocked = levelUnlocked && !adultLocked;
           const isSelected = mood.key === selectedMoodKey;
           const wasPrevious = mood.key === previousMoodKey;
           const unlockLevel = MOOD_UNLOCK_LEVEL[mood.key];
@@ -49,10 +58,15 @@ export function MoodSelectionForm({ previousMoodKey, level }: MoodSelectionFormP
                 {mood.label}
                 {wasPrevious ? <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-bold text-stone-500">前回</span> : null}
               </span>
-              <span className="mt-1 block text-xs leading-5 text-stone-500">{mood.description}</span>
-              {!unlocked ? (
+              <span className="mt-1 block text-xs text-stone-500">{mood.description}</span>
+              {!levelUnlocked ? (
                 <span className="mt-3 inline-flex rounded-full bg-stone-900 px-2 py-1 text-[10px] font-black text-white">
                   Lv{unlockLevel}で解放
+                </span>
+              ) : null}
+              {adultLocked ? (
+                <span className="mt-3 inline-flex rounded-full bg-stone-900 px-2 py-1 text-[10px] font-black text-white">
+                  20歳以上で選べます
                 </span>
               ) : null}
             </button>
@@ -70,9 +84,9 @@ function MoodSubmitArea({ selectedLabel, disabled, level }: { selectedLabel: str
 
   return (
     <div className="rounded-[1.7rem] border border-white/70 bg-white/80 p-4 shadow-sm backdrop-blur">
-      <p className="text-sm font-bold text-stone-700">{selectedLabel ? `選択中: ${selectedLabel}` : "今のノリを1つ選択してください"}</p>
+      <p className="text-sm font-bold text-stone-700">{selectedLabel ? `選択中: ${selectedLabel}` : "今のノリを1つ選んでください"}</p>
       <p className="mt-1 text-xs leading-5 text-stone-500">
-        現在Lv{level}です。レベルが上がると選べるノリが増えます。
+        今なにしてる？ではなく、今どんな誘いなら乗れそう？を置いておこう。現在Lv{level}です。
       </p>
       <SubmitButton
         disabled={disabled || pending}
