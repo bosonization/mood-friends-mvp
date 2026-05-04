@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { TransitionLink } from "@/components/TransitionLink";
 import { FriendlessStarter } from "@/components/FriendlessStarter";
+import { ContactActionPanel } from "@/components/ContactActionPanel";
 import type { ViewMode } from "@/lib/viewMode";
 
 export type FriendMoodViewItem = {
@@ -28,6 +29,10 @@ type FriendsMoodDisplayProps = {
 };
 
 type BubbleSize = "large" | "medium" | "small";
+
+type OrbitVisualItem =
+  | { kind: "friend"; item: FriendMoodViewItem }
+  | { kind: "placeholder"; id: string };
 
 const moodColors: Record<string, string> = {
   食事: "from-orange-200 via-amber-100 to-white",
@@ -84,6 +89,23 @@ function getBubbleStyle(item: FriendMoodViewItem, index: number) {
   const x = 50 + Math.cos(angle) * radius * 100;
   const y = 50 + Math.sin(angle) * radius * 78;
   const size = getBubbleSizePx(sizeType, index);
+
+  return {
+    width: `${size}px`,
+    height: `${size}px`,
+    left: `${Math.max(10, Math.min(90, x))}%`,
+    top: `${Math.max(12, Math.min(88, y))}%`,
+    transform: "translate(-50%, -50%)"
+  } as const;
+}
+
+
+function getPlaceholderBubbleStyle(index: number) {
+  const angle = index * goldenAngle + 0.9;
+  const ring = 0.46 + ((index % 3) - 1) * 0.025;
+  const x = 50 + Math.cos(angle) * ring * 100;
+  const y = 50 + Math.sin(angle) * ring * 78;
+  const size = 82 + (index % 2) * 8;
 
   return {
     width: `${size}px`,
@@ -199,6 +221,14 @@ export function FriendsMoodDisplay({ items, initialViewMode, inviteCode, ownerNa
 function MoodOrbit({ items }: { items: FriendMoodViewItem[] }) {
   const visibleItems = items.slice(0, 18);
   const hiddenCount = Math.max(0, items.length - visibleItems.length);
+  const placeholderCount = items.length > 0 && visibleItems.length < 5 ? 5 - visibleItems.length : 0;
+  const orbitItems: OrbitVisualItem[] = [
+    ...visibleItems.map((item) => ({ kind: "friend" as const, item })),
+    ...Array.from({ length: placeholderCount }, (_, index) => ({
+      kind: "placeholder" as const,
+      id: `empty-${index}`
+    }))
+  ];
   const [selectedId, setSelectedId] = useState(visibleItems[0]?.id ?? "");
   const selected = visibleItems.find((item) => item.id === selectedId) ?? visibleItems[0];
 
@@ -218,7 +248,22 @@ function MoodOrbit({ items }: { items: FriendMoodViewItem[] }) {
             </div>
           </div>
 
-          {visibleItems.map((item, index) => {
+          {orbitItems.map((orbitItem, index) => {
+            if (orbitItem.kind === "placeholder") {
+              return (
+                <div
+                  key={orbitItem.id}
+                  style={getPlaceholderBubbleStyle(index)}
+                  className="absolute z-0 rounded-full border border-white/70 bg-white/35 shadow-inner shadow-stone-200/50 ring-1 ring-white/70 backdrop-blur-xl"
+                  aria-hidden="true"
+                >
+                  <span className="absolute inset-2 rounded-full bg-gradient-to-br from-white/75 via-white/30 to-stone-100/30" />
+                  <span className="absolute left-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/80 bg-white/45" />
+                </div>
+              );
+            }
+
+            const item = orbitItem.item;
             const style = getBubbleStyle(item, index);
             const gradient = moodColors[item.moodLabel ?? ""] ?? "from-stone-100 via-white to-white";
             const isSelected = selected?.id === item.id;
@@ -297,11 +342,12 @@ function SelectedFriendCard({ selected }: { selected?: FriendMoodViewItem }) {
             <p className="mt-1 text-xs text-stone-400">現在のセッション 残り {selected.remainingTime}</p>
           ) : null}
         </div>
-        <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[10px] font-bold">
-          <span className="rounded-full bg-red-100 px-2 py-2 text-red-700">1時間以内</span>
-          <span className="rounded-full bg-emerald-100 px-2 py-2 text-emerald-700">6時間以内</span>
-          <span className="rounded-full bg-stone-100 px-2 py-2 text-stone-500">その他</span>
-        </div>
+        <ContactActionPanel
+          handleName={selected.handleName}
+          moodLabel={selected.moodLabel}
+          moodIcon={selected.moodIcon}
+          relativeTime={selected.relativeTime}
+        />
       </div>
     </div>
   );
