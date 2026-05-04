@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { hasContactLikeText } from "@/lib/safety";
+import { getAndSyncLevelStatus } from "@/lib/level";
 
 const schema = z.object({
   handleName: z.string().trim().min(1, "ハンドルネームを入力してください").max(30, "ハンドルネームは30文字以内です"),
@@ -56,7 +57,8 @@ export async function createProfile(formData: FormData) {
     is_adult: isAdult,
     terms_agreed_at: new Date().toISOString(),
     deleted_at: null,
-    max_level: 1
+    max_level: 1,
+    nori_update_count: 0
   });
 
   if (error) {
@@ -68,6 +70,7 @@ export async function createProfile(formData: FormData) {
   const inviteFromForm = String(formData.get("inviteToken") ?? "");
   const inviteFromMetadata = typeof user.user_metadata?.invite_token === "string" ? user.user_metadata.invite_token : "";
   await acceptInviteIfValid(supabase, inviteFromForm || inviteFromMetadata);
+  await getAndSyncLevelStatus(supabase, user.id, 1);
 
   redirect("/mood");
 }

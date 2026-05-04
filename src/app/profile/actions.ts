@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { hasContactLikeText } from "@/lib/safety";
+import { getAndSyncLevelStatus } from "@/lib/level";
 
 const schema = z.object({
   handleName: z.string().trim().min(1, "ハンドルネームを入力してください").max(30, "ハンドルネームは30文字以内です"),
@@ -40,7 +41,16 @@ export async function updateProfile(formData: FormData) {
     redirect(`/profile?message=${encodeURIComponent("連絡先や外部IDのような文字列は入れられません。")}`);
   }
 
+  const { data: beforeProfile } = await supabase.from("profiles").select("max_level").eq("id", user.id).maybeSingle<{ max_level: number | null }>();
+  const beforeStatus = await getAndSyncLevelStatus(supabase, user.id, beforeProfile?.max_level);
+
   const { error } = await supabase.from("profiles").update({ handle_name: handleName, tagline, avatar_url: avatarUrl || null, is_adult: isAdult }).eq("id", user.id);
   if (error) redirect(`/profile?message=${encodeURIComponent("更新に失敗しました。")}`);
+
+  const afterStatus = await getAndSyncLevelStatus(supabase, user.id, beforeProfile?.max_level);
+  if (afterStatus.level > beforeStatus.level) {
+    redirect(`/profile?message=${encodeURIComponent(`ノリのたねが育ちました。Lv${afterStatus.level} ${afterStatus.label}！`)}`);
+  }
+
   redirect(`/profile?message=${encodeURIComponent("更新しました。")}`);
 }

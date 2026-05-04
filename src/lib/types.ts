@@ -9,6 +9,7 @@ export type Profile = {
   is_adult: boolean;
   display_mode?: ViewMode | null;
   max_level?: number | null;
+  nori_update_count?: number | null;
   terms_agreed_at: string;
   created_at: string;
   updated_at: string;

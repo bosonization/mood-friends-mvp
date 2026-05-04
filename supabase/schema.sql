@@ -73,6 +73,8 @@ create table if not exists public.profiles (
   tagline text not null default '',
   avatar_url text,
   is_adult boolean not null default false,
+  max_level integer not null default 1 check (max_level between 1 and 5),
+  nori_update_count integer not null default 0 check (nori_update_count >= 0),
   terms_agreed_at timestamptz not null default now(),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),

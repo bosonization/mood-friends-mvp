@@ -11,6 +11,15 @@ export type LevelStatus = {
   needsReferralForLv5: boolean;
   label: string;
   nextMessage: string;
+  avatarCompleted: boolean;
+  noriUpdateCount: number;
+  cappedNoriUpdateCount: number;
+  growthPoints: number;
+  nextActionLabel: string;
+  nextUnlockLabel: string | null;
+  seedStage: string;
+  seedEmoji: string;
+  spotlightUnlocked: boolean;
 };
 
 type SupabaseLike = {
@@ -18,29 +27,48 @@ type SupabaseLike = {
 };
 
 export const LEVEL_LABELS: Record<UserLevel, string> = {
-  1: "はじまり",
-  2: "友達ができた",
-  3: "広がり中",
-  4: "全気分解放",
-  5: "Spotlight"
+  1: "赤ちゃんノリ",
+  2: "よちよちノリ",
+  3: "わんぱくノリ",
+  4: "イケノリ",
+  5: "オトナノリ"
+};
+
+export const LEVEL_SEED_EMOJI: Record<UserLevel, string> = {
+  1: "◼︎",
+  2: "◼︎",
+  3: "◼︎",
+  4: "◼︎",
+  5: "◼︎"
 };
 
 export const MOOD_UNLOCK_LEVEL: Record<MoodKey, UserLevel> = {
   food: 1,
   movie: 1,
-  game: 1,
   cafe: 1,
-  walk: 2,
-  work: 3,
-  drink: 4,
-  travel: 4
+  drink: 1,
+  game: 2,
+  walk: 3,
+  work: 4,
+  travel: 5
 };
 
-export function calculateLevel(friendCount: number, referralCount: number): UserLevel {
-  if (friendCount >= 3 && referralCount >= 1) return 5;
-  if (friendCount >= 3) return 4;
-  if (friendCount >= 2) return 3;
-  if (friendCount >= 1) return 2;
+export const LEVEL_UNLOCK_LABELS: Record<UserLevel, string> = {
+  1: "ごはん / 話す / チル / 飲み",
+  2: "ゲーム",
+  3: "外出",
+  4: "もくもく",
+  5: "何かしたい"
+};
+
+export function calculateLevel(avatarCompleted: boolean, noriUpdateCount: number): UserLevel {
+  const avatarPoint = avatarCompleted ? 1 : 0;
+  const updatePoints = Math.min(Math.max(noriUpdateCount, 0), 3);
+  const rawLevel = 1 + avatarPoint + updatePoints;
+  if (rawLevel >= 5) return 5;
+  if (rawLevel >= 4) return 4;
+  if (rawLevel >= 3) return 3;
+  if (rawLevel >= 2) return 2;
   return 1;
 }
 
@@ -56,40 +84,72 @@ export function isMoodUnlocked(moodKey: MoodKey, level: UserLevel) {
   return MOOD_UNLOCK_LEVEL[moodKey] <= level;
 }
 
-export function getNextFriendGoal(level: UserLevel, friendCount: number) {
-  if (level <= 1) return 1;
-  if (level <= 2) return 2;
-  if (level <= 3) return 3;
-  if (level === 4 && friendCount < 3) return 3;
+function getNextAction(avatarCompleted: boolean, noriUpdateCount: number, level: UserLevel) {
+  if (level >= 5) return "招待1人でSpotlight";
+  if (!avatarCompleted) return "画像を登録";
+  const nextCount = Math.min(noriUpdateCount + 1, 3);
+  return `ノリ${nextCount}回目へ`;
+}
+
+function getNextUnlock(level: UserLevel) {
+  if (level < 2) return "次に解放：ゲーム";
+  if (level < 3) return "次に解放：外出";
+  if (level < 4) return "次に解放：もくもく";
+  if (level < 5) return "次に解放：何かしたい";
   return null;
 }
 
-export function buildLevelStatus(maxLevel: UserLevel, friendCount: number, referralCount: number): LevelStatus {
-  const computedLevel = calculateLevel(friendCount, referralCount);
-  const level = normalizeLevel(Math.max(maxLevel, computedLevel));
-  const nextFriendGoal = getNextFriendGoal(level, friendCount);
-  const needsReferralForLv5 = level < 5 && friendCount >= 3 && referralCount < 1;
+export function getNextFriendGoal(_level: UserLevel, friendCount: number) {
+  return friendCount < 1 ? 1 : null;
+}
 
-  let nextMessage = "Lv5 Spotlight解放済み。1日1回、30分だけ気分を強調できます。";
-  if (level < 2) nextMessage = "友達を1人追加すると、散歩が解放されます。";
-  else if (level < 3) nextMessage = "友達を2人にすると、作業が解放されます。";
-  else if (level < 4) nextMessage = "友達を3人にすると、すべての気分が解放されます。";
-  else if (level < 5) nextMessage = "招待コード経由で1人登録されると、Spotlightが解放されます。";
+export function buildLevelStatus(params: {
+  maxLevel: UserLevel;
+  avatarCompleted: boolean;
+  noriUpdateCount: number;
+  friendCount: number;
+  referralCount: number;
+}): LevelStatus {
+  const { maxLevel, avatarCompleted, noriUpdateCount, friendCount, referralCount } = params;
+  const computedLevel = calculateLevel(avatarCompleted, noriUpdateCount);
+  const level = normalizeLevel(Math.max(maxLevel, computedLevel));
+  const cappedNoriUpdateCount = Math.min(Math.max(noriUpdateCount, 0), 3);
+  const growthPoints = (avatarCompleted ? 1 : 0) + cappedNoriUpdateCount;
+  const spotlightUnlocked = level >= 5 && referralCount >= 1;
+  const needsReferralForLv5 = level >= 5 && referralCount < 1;
+  const nextUnlockLabel = getNextUnlock(level);
+  let nextMessage = getNextAction(avatarCompleted, noriUpdateCount, level);
+  if (spotlightUnlocked) nextMessage = "Spotlight解放済み";
+  else if (level >= 5) nextMessage = "招待1人でSpotlight解放";
 
   return {
     level,
     computedLevel,
     friendCount,
     referralCount,
-    nextFriendGoal,
+    nextFriendGoal: getNextFriendGoal(level, friendCount),
     needsReferralForLv5,
     label: LEVEL_LABELS[level],
-    nextMessage
+    nextMessage,
+    avatarCompleted,
+    noriUpdateCount,
+    cappedNoriUpdateCount,
+    growthPoints,
+    nextActionLabel: getNextAction(avatarCompleted, noriUpdateCount, level),
+    nextUnlockLabel,
+    seedStage: LEVEL_LABELS[level],
+    seedEmoji: LEVEL_SEED_EMOJI[level],
+    spotlightUnlocked
   };
 }
 
 export async function getAndSyncLevelStatus(supabase: SupabaseLike, userId: string, currentMaxLevel: number | null | undefined) {
-  const [{ count: friendCountRaw }, { count: referralCountRaw }] = await Promise.all([
+  const [{ data: profile }, { count: friendCountRaw }, { count: referralCountRaw }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("avatar_url,nori_update_count,max_level")
+      .eq("id", userId)
+      .maybeSingle(),
     supabase
       .from("friendships")
       .select("id", { count: "exact", head: true })
@@ -101,10 +161,13 @@ export async function getAndSyncLevelStatus(supabase: SupabaseLike, userId: stri
       .eq("inviter_id", userId)
   ]);
 
+  const typedProfile = profile as { avatar_url: string | null; nori_update_count: number | null; max_level: number | null } | null;
   const friendCount = friendCountRaw ?? 0;
   const referralCount = referralCountRaw ?? 0;
-  const currentMax = normalizeLevel(currentMaxLevel ?? 1);
-  const status = buildLevelStatus(currentMax, friendCount, referralCount);
+  const avatarCompleted = Boolean(typedProfile?.avatar_url);
+  const noriUpdateCount = typedProfile?.nori_update_count ?? 0;
+  const currentMax = normalizeLevel(typedProfile?.max_level ?? currentMaxLevel ?? 1);
+  const status = buildLevelStatus({ maxLevel: currentMax, avatarCompleted, noriUpdateCount, friendCount, referralCount });
 
   if (status.level > currentMax) {
     await supabase.from("profiles").update({ max_level: status.level }).eq("id", userId);

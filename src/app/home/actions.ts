@@ -23,8 +23,8 @@ export async function startSpotlight() {
   if (!profile || profile.deleted_at) redirect("/onboarding");
 
   const levelStatus = await getAndSyncLevelStatus(supabase, user.id, profile.max_level);
-  if (levelStatus.level < 5) {
-    redirect(`/home?message=${encodeURIComponent("SpotlightはLv5で解放されます。")}`);
+  if (!levelStatus.spotlightUnlocked) {
+    redirect(`/home?message=${encodeURIComponent("SpotlightはLv5 + 招待登録1人で解放されます。")}`);
   }
 
   const { data: mood } = await supabase
@@ -34,7 +34,7 @@ export async function startSpotlight() {
     .maybeSingle<{ session_expires_at: string }>();
 
   if (!isMoodSessionActive(mood)) {
-    redirect(`/mood?message=${encodeURIComponent("Spotlightは気分セッション中のみ使えます。")}`);
+    redirect(`/mood?message=${encodeURIComponent("Spotlightはノリを置いている間だけ使えます。")}`);
   }
 
   const spotlightDate = todayKey();
