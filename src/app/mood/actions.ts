@@ -23,9 +23,9 @@ export async function startMoodSession(formData: FormData) {
 
   const { data: current } = await supabase
     .from("mood_statuses")
-    .select("session_expires_at")
+    .select("mood_key, session_expires_at, current_entry_id")
     .eq("user_id", user.id)
-    .maybeSingle<{ session_expires_at: string }>();
+    .maybeSingle<{ mood_key: string; session_expires_at: string; current_entry_id?: string | null }>();
 
   if (isMoodSessionActive(current)) {
     redirect(`/home?message=${encodeURIComponent("今のノリはまだ変更できません。")}`);
@@ -42,6 +42,30 @@ export async function startMoodSession(formData: FormData) {
 
   if (moodKey === "drink" && !profile.is_adult) {
     redirect(`/mood?message=${encodeURIComponent("飲みのノリは20歳以上で選べます。別のノリを選んでください。")}`);
+  }
+
+  const stealthMode = String(formData.get("stealthMode") ?? "") === "on";
+  if (stealthMode && moodKey === "cafe" && current?.current_entry_id) {
+    const today = new Date().toISOString().slice(0, 10);
+    const { data: usedToday } = await supabase
+      .from("nori_stealth_uses")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("use_date", today)
+      .maybeSingle<{ id: string }>();
+
+    if (usedToday) {
+      redirect(`/mood?message=${encodeURIComponent("Quiet passは今日は使用済みです。")}`);
+    }
+
+    const { error: stealthError } = await supabase.from("nori_stealth_uses").insert({
+      user_id: user.id,
+      use_date: today
+    });
+
+    if (!stealthError) {
+      redirect(`/home?message=${encodeURIComponent("ノリを更新せずに入りました。")}`);
+    }
   }
 
   const now = new Date();

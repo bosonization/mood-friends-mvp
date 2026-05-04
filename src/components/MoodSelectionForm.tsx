@@ -23,11 +23,24 @@ export function MoodSelectionForm({ previousMoodKey, level, isAdult }: MoodSelec
     return MOODS.find((mood) => isMoodUnlocked(mood.key, level) && (isAdult || !isDrinkMood(mood.key)));
   }, [level, isAdult]);
   const [selectedMoodKey, setSelectedMoodKey] = useState<MoodKey | "">(firstUnlocked?.key ?? "");
+  const [chillTapCount, setChillTapCount] = useState(0);
   const selectedMood = MOODS.find((mood) => mood.key === selectedMoodKey);
+  const stealthUnlocked = selectedMoodKey === "cafe" && chillTapCount >= 5;
+
+  function handleMoodTap(key: MoodKey, unlocked: boolean) {
+    if (!unlocked) return;
+    setSelectedMoodKey(key);
+    if (key === "cafe") {
+      setChillTapCount((count) => Math.min(5, count + 1));
+    } else {
+      setChillTapCount(0);
+    }
+  }
 
   return (
     <form action={startMoodSession} className="mt-7 space-y-6">
       <input type="hidden" name="moodKey" value={selectedMoodKey} />
+      <input type="hidden" name="stealthMode" value={stealthUnlocked ? "on" : ""} />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {MOODS.map((mood) => {
@@ -43,7 +56,7 @@ export function MoodSelectionForm({ previousMoodKey, level, isAdult }: MoodSelec
               key={mood.key}
               type="button"
               disabled={!unlocked}
-              onClick={() => unlocked && setSelectedMoodKey(mood.key)}
+              onClick={() => handleMoodTap(mood.key, unlocked)}
               className={`relative rounded-[1.6rem] border p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md disabled:cursor-not-allowed disabled:hover:translate-y-0 ${
                 isSelected
                   ? "border-fuchsia-300 bg-gradient-to-br from-white to-fuchsia-50 ring-4 ring-fuchsia-100"
@@ -74,12 +87,12 @@ export function MoodSelectionForm({ previousMoodKey, level, isAdult }: MoodSelec
         })}
       </div>
 
-      <MoodSubmitArea selectedLabel={selectedMood ? `${selectedMood.icon} ${selectedMood.label}` : null} disabled={!selectedMoodKey} level={level} />
+      <MoodSubmitArea selectedLabel={selectedMood ? `${selectedMood.icon} ${selectedMood.label}` : null} disabled={!selectedMoodKey} level={level} stealthUnlocked={stealthUnlocked} />
     </form>
   );
 }
 
-function MoodSubmitArea({ selectedLabel, disabled, level }: { selectedLabel: string | null; disabled: boolean; level: UserLevel }) {
+function MoodSubmitArea({ selectedLabel, disabled, level, stealthUnlocked }: { selectedLabel: string | null; disabled: boolean; level: UserLevel; stealthUnlocked: boolean }) {
   const { pending } = useFormStatus();
 
   return (
@@ -88,12 +101,21 @@ function MoodSubmitArea({ selectedLabel, disabled, level }: { selectedLabel: str
       <p className="mt-1 text-xs leading-5 text-stone-500">
         今なにしてる？ではなく、今どんな誘いなら乗れそう？を置いておこう。現在Lv{level}です。
       </p>
+      {stealthUnlocked ? (
+        <p className="mt-3 rounded-2xl bg-stone-950 px-4 py-3 text-xs font-black text-white shadow-sm">
+          Quiet pass unlocked
+        </p>
+      ) : null}
       <SubmitButton
         disabled={disabled || pending}
-        pendingText="置いています..."
-        className="mt-4 w-full rounded-2xl bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 px-5 py-3 font-black text-white shadow-lg shadow-blue-200 transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100"
+        pendingText={stealthUnlocked ? "入室中..." : "置いています..."}
+        className={`mt-4 w-full rounded-2xl px-5 py-3 font-black text-white shadow-lg transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 ${
+          stealthUnlocked
+            ? "bg-gradient-to-r from-stone-900 via-slate-800 to-zinc-900 shadow-stone-200"
+            : "bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 shadow-blue-200"
+        }`}
       >
-        今のノリを置く
+        {stealthUnlocked ? "このまま入る" : "今のノリを置く"}
       </SubmitButton>
     </div>
   );

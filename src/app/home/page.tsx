@@ -32,7 +32,15 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const levelStatus = await getAndSyncLevelStatus(supabase, user.id, profile.max_level);
 
   const { data: myMood } = await supabase.from("mood_statuses").select("*").eq("user_id", user.id).maybeSingle<MoodStatus>();
-  if (!isMoodSessionActive(myMood)) redirect("/mood");
+  const moodActive = isMoodSessionActive(myMood);
+  const { data: todayStealth } = await supabase
+    .from("nori_stealth_uses")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("use_date", todayKey())
+    .maybeSingle<{ id: string }>();
+  const stealthActive = Boolean(myMood?.current_entry_id && !moodActive && todayStealth);
+  if (!moodActive && !stealthActive) redirect("/mood");
 
   const { data: friendships } = await supabase
     .from("friendships")
@@ -163,7 +171,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           status={levelStatus}
           memberCode={profile.member_code}
           handleName={profile.handle_name}
-          hasActiveMood={isMoodSessionActive(myMood)}
+          hasActiveMood={moodActive || stealthActive}
           spotlightActive={Boolean(mySpotlight)}
           spotlightUsedToday={Boolean(todaySpotlight)}
         />
@@ -177,8 +185,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             moodIcon={currentMood.icon}
             moodLabel={currentMood.label}
             moodDescription={currentMood.description}
-            remainingTime={formatRemainingTime(myMood)}
+            remainingTime={stealthActive ? "Quiet" : formatRemainingTime(myMood)}
             spotlightActive={Boolean(mySpotlight)}
+            stealthActive={stealthActive}
             likeSummary={likeSummary}
           />
         ) : null}

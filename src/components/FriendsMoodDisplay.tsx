@@ -324,7 +324,7 @@ function MoodOrbit({ items }: { items: FriendMoodViewItem[] }) {
                     <BubbleAvatar item={item} className={avatarClass} />
                     <span className={`${node.size < 82 ? "h-6 w-6 text-xs" : "h-7 w-7 text-sm"} absolute -right-2 -top-2 grid place-items-center rounded-full border border-white bg-white shadow-md`}>{item.moodIcon ?? "◌"}</span>
                     {item.spotlightActive ? <span className="absolute -left-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-gradient-to-r from-fuchsia-500 to-violet-600 text-xs text-white shadow-md">✨</span> : null}
-                    {(item.likeCount ?? 0) > 0 ? <span className="absolute -bottom-2 -left-2 grid h-6 min-w-6 place-items-center rounded-full bg-white px-1 text-[10px] font-black text-pink-600 shadow-md">♡{item.likeCount}</span> : null}
+                    {(item.likeCount ?? 0) > 0 ? <span className="absolute -bottom-2 -left-2 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-1.5 text-[10px] font-black text-white shadow-lg shadow-pink-100">♥{item.likeCount}</span> : null}
                   </span>
                   <span className={`mt-2 max-w-[92%] truncate font-black text-stone-900 ${text.name}`}>{item.handleName}</span>
                   <span className={`mt-1 rounded-full px-2 py-0.5 font-black ${getBadgeClasses(item)} ${text.time}`}>{item.freshness === "normal" || compactMode ? compactTime(item.relativeTime) : item.relativeTime}</span>
@@ -358,7 +358,7 @@ function SelectedFriendCard({ item }: { item?: FriendMoodViewItem }) {
           <p className="mt-4 text-xs text-stone-400">{item.relativeTime}</p>
           {item.active && item.remainingTime ? <p className="mt-1 text-xs text-stone-400">現在のセッション 残り {item.remainingTime}</p> : null}
           {item.spotlightActive ? <p className="mt-2 rounded-full bg-fuchsia-500/20 px-3 py-2 text-xs font-black text-fuchsia-100">✨ Spotlight中</p> : null}
-          {(item.likeCount ?? 0) > 0 ? <p className="mt-2 rounded-full bg-white/10 px-3 py-2 text-xs font-black text-pink-100">♡ {item.likeCount} いいね</p> : null}
+          {(item.likeCount ?? 0) > 0 ? <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-pink-500/25 to-rose-500/25 px-3 py-2 text-xs font-black text-pink-50 ring-1 ring-white/10">♥ {item.likeCount} Nori Like</p> : null}
         </div>
         <MoodLikeButton item={item} />
         <ContactActionPanel handleName={item.handleName} moodLabel={item.moodLabel} moodIcon={item.moodIcon} relativeTime={item.relativeTime} />
@@ -377,13 +377,20 @@ function MoodLikeButton({ item }: { item: FriendMoodViewItem }) {
       <input type="hidden" name="intent" value={item.likedByMe ? "unlike" : "like"} />
       <button
         type="submit"
-        className={`w-full rounded-2xl px-4 py-3 text-sm font-black shadow-sm transition hover:scale-[1.01] ${
+        className={`group relative w-full overflow-hidden rounded-[1.35rem] px-4 py-3.5 text-sm font-black shadow-sm transition hover:scale-[1.01] ${
           item.likedByMe
-            ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-pink-100"
-            : "border border-pink-100 bg-white text-pink-700 hover:bg-pink-50"
+            ? "bg-gradient-to-r from-pink-500 via-rose-500 to-orange-400 text-white shadow-lg shadow-pink-100"
+            : "border border-pink-100 bg-gradient-to-r from-white to-pink-50/70 text-stone-900 hover:border-pink-200 hover:shadow-md hover:shadow-pink-100"
         }`}
       >
-        {item.likedByMe ? "♥ いいね済み" : "♡ いいね"}
+        <span className="absolute inset-y-0 left-0 w-1/3 bg-white/20 opacity-0 blur-xl transition group-hover:translate-x-[260%] group-hover:opacity-100" />
+        <span className="relative flex items-center justify-center gap-2">
+          <span className={`grid h-8 w-8 place-items-center rounded-full ${item.likedByMe ? "bg-white/20 text-white" : "bg-pink-100 text-pink-600"}`}>
+            {item.likedByMe ? "♥" : "♡"}
+          </span>
+          <span>{item.likedByMe ? "Nori Like済み" : "Nori Like"}</span>
+          {(item.likeCount ?? 0) > 0 ? <span className={`rounded-full px-2 py-1 text-[11px] ${item.likedByMe ? "bg-white/20 text-white" : "bg-white text-pink-600"}`}>{item.likeCount}</span> : null}
+        </span>
       </button>
     </form>
   );

@@ -19,6 +19,7 @@ type NoriCardShareProps = {
   moodDescription: string;
   remainingTime?: string | null;
   spotlightActive?: boolean;
+  stealthActive?: boolean;
   likeSummary?: NoriLikeSummary;
 };
 
@@ -40,7 +41,21 @@ function getInviteUrl(token: string) {
   return `${window.location.origin}/invite/${token}`;
 }
 
-export function NoriCardShare({ memberCode, handleName, moodIcon, moodLabel, moodDescription, remainingTime, spotlightActive, likeSummary }: NoriCardShareProps) {
+function NamesPill({ names }: { names: string[] }) {
+  if (names.length === 0) return <p className="text-xs text-stone-400">まだいいねはありません</p>;
+  return (
+    <div className="mt-2 flex flex-wrap gap-1.5">
+      {names.slice(0, 8).map((name, index) => (
+        <span key={`${name}-${index}`} className="rounded-full bg-white px-2.5 py-1 text-[11px] font-black text-stone-700 shadow-sm">
+          {name}
+        </span>
+      ))}
+      {names.length > 8 ? <span className="rounded-full bg-stone-900 px-2.5 py-1 text-[11px] font-black text-white">+{names.length - 8}</span> : null}
+    </div>
+  );
+}
+
+export function NoriCardShare({ memberCode, handleName, moodIcon, moodLabel, moodDescription, remainingTime, spotlightActive, stealthActive, likeSummary }: NoriCardShareProps) {
   const [creating, setCreating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
@@ -114,21 +129,35 @@ export function NoriCardShare({ memberCode, handleName, moodIcon, moodLabel, moo
   const qrUrl = inviteUrl ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=12&data=${encodeURIComponent(inviteUrl)}` : null;
 
   return (
-    <section className="overflow-hidden rounded-[1.7rem] border border-white/70 bg-white/85 p-4 shadow-sm backdrop-blur-xl">
+    <section className="overflow-hidden rounded-[1.8rem] border border-white/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.94),rgba(255,247,250,0.86))] p-4 shadow-sm backdrop-blur-xl">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-orange-50 via-pink-50 to-white text-4xl shadow-sm shadow-orange-100">
+          <div className="relative grid h-16 w-16 shrink-0 place-items-center rounded-[1.35rem] bg-gradient-to-br from-orange-50 via-pink-50 to-white text-4xl shadow-lg shadow-orange-100">
+            <span className="absolute -right-1 -top-1 h-4 w-4 rounded-full bg-gradient-to-r from-orange-400 to-pink-500 shadow-sm" />
             {moodIcon}
           </div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-pink-600">Nori Card</p>
-              {remainingTime ? <span className="rounded-full bg-gradient-to-r from-orange-500 via-pink-500 to-violet-600 px-2.5 py-1 text-[10px] font-black text-white shadow-sm">変更まで {remainingTime}</span> : null}
-              {totalLikeCount > 0 ? <button type="button" onClick={() => setShowLikes((current) => !current)} className="rounded-full bg-pink-50 px-2.5 py-1 text-[10px] font-black text-pink-700 shadow-sm">♡ 今{currentLikeCount} / 前{previousLikeCount}</button> : null}
+              {remainingTime ? <span className={`rounded-full px-2.5 py-1 text-[10px] font-black shadow-sm ${stealthActive ? "bg-stone-950 text-white" : "bg-gradient-to-r from-orange-500 via-pink-500 to-violet-600 text-white"}`}>{stealthActive ? "Quiet" : `変更まで ${remainingTime}`}</span> : null}
               {spotlightActive ? <span className="rounded-full bg-fuchsia-50 px-2 py-0.5 text-[10px] font-black text-fuchsia-700">✨ Spotlight</span> : null}
+              {totalLikeCount > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => setShowLikes((current) => !current)}
+                  className="group inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-3 py-1 text-[10px] font-black text-white shadow-lg shadow-pink-100 transition hover:scale-[1.03]"
+                >
+                  <span className="text-xs">♥</span>
+                  <span>今{currentLikeCount}</span>
+                  <span className="h-3 w-px bg-white/35" />
+                  <span>前{previousLikeCount}</span>
+                </button>
+              ) : (
+                <span className="rounded-full bg-white/70 px-2.5 py-1 text-[10px] font-black text-stone-400 shadow-sm">♡ 0</span>
+              )}
               {expiresAt ? <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-black text-stone-500">招待期限 {formatExpiresAt(expiresAt)}</span> : null}
             </div>
-            <h2 className="mt-1 truncate text-lg font-black">{moodLabel}</h2>
+            <h2 className="mt-1 truncate text-lg font-black text-stone-950">{moodLabel}</h2>
             <p className="mt-0.5 line-clamp-1 text-xs text-stone-600 sm:line-clamp-2">{moodDescription}</p>
           </div>
         </div>
@@ -147,16 +176,22 @@ export function NoriCardShare({ memberCode, handleName, moodIcon, moodLabel, moo
       </div>
 
       {showLikes && totalLikeCount > 0 ? (
-        <div className="mt-3 rounded-[1.35rem] border border-pink-100 bg-pink-50/80 p-3">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-pink-600">Nori Likes</p>
-          <div className="mt-2 grid gap-2 sm:grid-cols-2">
-            <div className="rounded-2xl bg-white/80 p-3">
-              <p className="text-sm font-black text-stone-900">今のノリ ♡{currentLikeCount}</p>
-              <p className="mt-1 text-xs leading-5 text-stone-500">{likeSummary?.currentNames.length ? likeSummary.currentNames.join("、") : "まだいいねはありません"}</p>
+        <div className="mt-3 rounded-[1.45rem] border border-pink-100 bg-[radial-gradient(circle_at_0%_0%,rgba(244,114,182,0.22),transparent_36%),rgba(255,255,255,0.8)] p-3 shadow-inner">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-pink-600">Nori Likes</p>
+              <h3 className="mt-1 text-sm font-black text-stone-950">あなたのノリに届いた反応</h3>
             </div>
-            <div className="rounded-2xl bg-white/80 p-3">
-              <p className="text-sm font-black text-stone-900">前のノリ {likeSummary?.previousMoodIcon ?? ""} {likeSummary?.previousMoodLabel ?? ""} ♡{previousLikeCount}</p>
-              <p className="mt-1 text-xs leading-5 text-stone-500">{likeSummary?.previousNames.length ? likeSummary.previousNames.join("、") : "まだいいねはありません"}</p>
+            <span className="rounded-full bg-stone-950 px-3 py-1 text-xs font-black text-white">♥ {totalLikeCount}</span>
+          </div>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            <div className="rounded-2xl border border-white/70 bg-white/80 p-3 shadow-sm">
+              <p className="text-sm font-black text-stone-900">今のノリ <span className="text-pink-600">♥{currentLikeCount}</span></p>
+              <NamesPill names={likeSummary?.currentNames ?? []} />
+            </div>
+            <div className="rounded-2xl border border-white/70 bg-white/80 p-3 shadow-sm">
+              <p className="text-sm font-black text-stone-900">前のノリ {likeSummary?.previousMoodIcon ?? ""} {likeSummary?.previousMoodLabel ?? ""} <span className="text-pink-600">♥{previousLikeCount}</span></p>
+              <NamesPill names={likeSummary?.previousNames ?? []} />
             </div>
           </div>
         </div>
