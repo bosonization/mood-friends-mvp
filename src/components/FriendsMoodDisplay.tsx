@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { ContactActionPanel } from "@/components/ContactActionPanel";
 import { FriendlessStarter } from "@/components/FriendlessStarter";
 import { TransitionLink } from "@/components/TransitionLink";
@@ -368,31 +369,98 @@ function SelectedFriendCard({ item }: { item?: FriendMoodViewItem }) {
 }
 
 function MoodLikeButton({ item }: { item: FriendMoodViewItem }) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [liked, setLiked] = useState(Boolean(item.likedByMe));
+  const [likeCount, setLikeCount] = useState(item.likeCount ?? 0);
+  const [toast, setToast] = useState<"liked" | "unliked" | null>(null);
+  const [bursting, setBursting] = useState(false);
+
+  useEffect(() => {
+    setLiked(Boolean(item.likedByMe));
+    setLikeCount(item.likeCount ?? 0);
+    setToast(null);
+    setBursting(false);
+  }, [item.currentEntryId, item.likedByMe, item.likeCount]);
+
   if (!item.currentEntryId || !item.moodIcon) return null;
 
+  async function submitLike() {
+    if (!item.currentEntryId || isPending) return;
+
+    const nextLiked = !liked;
+    setLiked(nextLiked);
+    setLikeCount((current) => Math.max(0, current + (nextLiked ? 1 : -1)));
+    setToast(nextLiked ? "liked" : "unliked");
+    setBursting(nextLiked);
+    window.setTimeout(() => setBursting(false), 850);
+    window.setTimeout(() => setToast(null), 1800);
+
+    const formData = new FormData();
+    formData.set("moodEntryId", item.currentEntryId);
+    formData.set("targetUserId", item.id);
+    formData.set("intent", nextLiked ? "like" : "unlike");
+
+    startTransition(async () => {
+      try {
+        await toggleMoodLike(formData);
+        router.refresh();
+      } catch {
+        setLiked(!nextLiked);
+        setLikeCount((current) => Math.max(0, current + (nextLiked ? -1 : 1)));
+        setToast(null);
+        alert("Nori Likeの更新に失敗しました。もう一度試してください。");
+      }
+    });
+  }
+
+  const disabled = isPending;
+
   return (
-    <form action={toggleMoodLike} className="mt-3">
-      <input type="hidden" name="moodEntryId" value={item.currentEntryId} />
-      <input type="hidden" name="targetUserId" value={item.id} />
-      <input type="hidden" name="intent" value={item.likedByMe ? "unlike" : "like"} />
+    <div className="relative mt-3">
+      {toast ? (
+        <div className="pointer-events-none fixed bottom-24 left-1/2 z-50 -translate-x-1/2 animate-[noriLikeToast_1.8s_ease-out_forwards] rounded-full border border-white/70 bg-stone-950/90 px-4 py-3 text-sm font-black text-white shadow-2xl shadow-pink-300/40 backdrop-blur-xl">
+          <span className="mr-2 inline-grid h-7 w-7 animate-[noriHeartPop_0.55s_cubic-bezier(.2,1.4,.4,1)_both] place-items-center rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-400/30">♥</span>
+          {toast === "liked" ? "Nori Likeしました" : "Nori Likeを取り消しました"}
+        </div>
+      ) : null}
+
       <button
-        type="submit"
-        className={`group relative w-full overflow-hidden rounded-[1.35rem] px-4 py-3.5 text-sm font-black shadow-sm transition hover:scale-[1.01] ${
-          item.likedByMe
+        type="button"
+        disabled={disabled}
+        onClick={submitLike}
+        className={`group relative w-full overflow-hidden rounded-[1.35rem] px-4 py-3.5 text-sm font-black shadow-sm transition duration-300 hover:scale-[1.01] disabled:cursor-wait disabled:opacity-75 ${
+          liked
             ? "bg-gradient-to-r from-pink-500 via-rose-500 to-orange-400 text-white shadow-lg shadow-pink-100"
             : "border border-pink-100 bg-gradient-to-r from-white to-pink-50/70 text-stone-900 hover:border-pink-200 hover:shadow-md hover:shadow-pink-100"
         }`}
       >
-        <span className="absolute inset-y-0 left-0 w-1/3 bg-white/20 opacity-0 blur-xl transition group-hover:translate-x-[260%] group-hover:opacity-100" />
-        <span className="relative flex items-center justify-center gap-2">
-          <span className={`grid h-8 w-8 place-items-center rounded-full ${item.likedByMe ? "bg-white/20 text-white" : "bg-pink-100 text-pink-600"}`}>
-            {item.likedByMe ? "♥" : "♡"}
+        <span className="absolute inset-y-0 left-0 w-1/3 bg-white/20 opacity-0 blur-xl transition duration-700 group-hover:translate-x-[260%] group-hover:opacity-100" />
+        {bursting ? (
+          <span className="pointer-events-none absolute inset-0 grid place-items-center">
+            {[0, 1, 2, 3, 4, 5].map((index) => (
+              <span
+                key={index}
+                className="absolute text-pink-100 opacity-0 animate-[noriParticle_0.8s_ease-out_forwards]"
+                style={{
+                  transform: `rotate(${index * 60}deg) translateY(-22px)`,
+                  animationDelay: `${index * 35}ms`
+                }}
+              >
+                ♥
+              </span>
+            ))}
           </span>
-          <span>{item.likedByMe ? "Nori Like済み" : "Nori Like"}</span>
-          {(item.likeCount ?? 0) > 0 ? <span className={`rounded-full px-2 py-1 text-[11px] ${item.likedByMe ? "bg-white/20 text-white" : "bg-white text-pink-600"}`}>{item.likeCount}</span> : null}
+        ) : null}
+        <span className="relative flex items-center justify-center gap-2">
+          <span className={`grid h-8 w-8 place-items-center rounded-full transition ${liked ? "animate-[noriHeartPop_0.55s_cubic-bezier(.2,1.4,.4,1)_both] bg-white/20 text-white" : "bg-pink-100 text-pink-600 group-hover:scale-110"}`}>
+            {liked ? "♥" : "♡"}
+          </span>
+          <span>{liked ? "Nori Like済み" : "Nori Like"}</span>
+          {likeCount > 0 ? <span className={`rounded-full px-2 py-1 text-[11px] ${liked ? "bg-white/20 text-white" : "bg-white text-pink-600"}`}>{likeCount}</span> : null}
         </span>
       </button>
-    </form>
+    </div>
   );
 }
 
