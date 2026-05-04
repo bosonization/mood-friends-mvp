@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { ContactActionPanel } from "@/components/ContactActionPanel";
 import { FriendlessStarter } from "@/components/FriendlessStarter";
 import { TransitionLink } from "@/components/TransitionLink";
+import { toggleMoodLike } from "@/app/home/reactions";
 import type { ViewMode } from "@/lib/viewMode";
 
 export type FriendMoodViewItem = {
@@ -21,6 +22,9 @@ export type FriendMoodViewItem = {
   freshness: "hot" | "fresh" | "normal";
   spotlightActive?: boolean;
   spotlightExpiresAt?: string | null;
+  currentEntryId?: string | null;
+  likedByMe?: boolean;
+  likeCount?: number;
 };
 
 type FriendsMoodDisplayProps = {
@@ -44,14 +48,14 @@ const APPROX_STAGE_HEIGHT = 620;
 const CENTER_CLEAR_RADIUS = 0.115;
 
 const moodBias: Record<string, number> = {
-  食事: -0.72,
-  お酒: -0.25,
-  ウキウキ: 0.06,
+  ごはん: -0.72,
+  飲み: -0.25,
+  "何かしたい": 0.06,
   ゲーム: 2.28,
-  カフェ: 0.78,
-  散歩: 1.56,
-  会話: 0.33,
-  作業: 2.76
+  チル: 0.78,
+  外出: 1.56,
+  話す: 0.33,
+  もくもく: 2.76
 };
 
 function getFreshnessRank(freshness: FriendMoodViewItem["freshness"]) {
@@ -320,6 +324,7 @@ function MoodOrbit({ items }: { items: FriendMoodViewItem[] }) {
                     <BubbleAvatar item={item} className={avatarClass} />
                     <span className={`${node.size < 82 ? "h-6 w-6 text-xs" : "h-7 w-7 text-sm"} absolute -right-2 -top-2 grid place-items-center rounded-full border border-white bg-white shadow-md`}>{item.moodIcon ?? "◌"}</span>
                     {item.spotlightActive ? <span className="absolute -left-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-gradient-to-r from-fuchsia-500 to-violet-600 text-xs text-white shadow-md">✨</span> : null}
+                    {(item.likeCount ?? 0) > 0 ? <span className="absolute -bottom-2 -left-2 grid h-6 min-w-6 place-items-center rounded-full bg-white px-1 text-[10px] font-black text-pink-600 shadow-md">♡{item.likeCount}</span> : null}
                   </span>
                   <span className={`mt-2 max-w-[92%] truncate font-black text-stone-900 ${text.name}`}>{item.handleName}</span>
                   <span className={`mt-1 rounded-full px-2 py-0.5 font-black ${getBadgeClasses(item)} ${text.time}`}>{item.freshness === "normal" || compactMode ? compactTime(item.relativeTime) : item.relativeTime}</span>
@@ -353,10 +358,34 @@ function SelectedFriendCard({ item }: { item?: FriendMoodViewItem }) {
           <p className="mt-4 text-xs text-stone-400">{item.relativeTime}</p>
           {item.active && item.remainingTime ? <p className="mt-1 text-xs text-stone-400">現在のセッション 残り {item.remainingTime}</p> : null}
           {item.spotlightActive ? <p className="mt-2 rounded-full bg-fuchsia-500/20 px-3 py-2 text-xs font-black text-fuchsia-100">✨ Spotlight中</p> : null}
+          {(item.likeCount ?? 0) > 0 ? <p className="mt-2 rounded-full bg-white/10 px-3 py-2 text-xs font-black text-pink-100">♡ {item.likeCount} いいね</p> : null}
         </div>
+        <MoodLikeButton item={item} />
         <ContactActionPanel handleName={item.handleName} moodLabel={item.moodLabel} moodIcon={item.moodIcon} relativeTime={item.relativeTime} />
       </div>
     </div>
+  );
+}
+
+function MoodLikeButton({ item }: { item: FriendMoodViewItem }) {
+  if (!item.currentEntryId || !item.moodIcon) return null;
+
+  return (
+    <form action={toggleMoodLike} className="mt-3">
+      <input type="hidden" name="moodEntryId" value={item.currentEntryId} />
+      <input type="hidden" name="targetUserId" value={item.id} />
+      <input type="hidden" name="intent" value={item.likedByMe ? "unlike" : "like"} />
+      <button
+        type="submit"
+        className={`w-full rounded-2xl px-4 py-3 text-sm font-black shadow-sm transition hover:scale-[1.01] ${
+          item.likedByMe
+            ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-pink-100"
+            : "border border-pink-100 bg-white text-pink-700 hover:bg-pink-50"
+        }`}
+      >
+        {item.likedByMe ? "♥ いいね済み" : "♡ いいね"}
+      </button>
+    </form>
   );
 }
 
@@ -382,7 +411,7 @@ function PulseList({ items }: { items: FriendMoodViewItem[] }) {
         return (
           <article key={item.id} className={`flex items-center gap-3 rounded-3xl border p-4 shadow-sm ${accent}`}>
             <BubbleAvatar item={item} className="h-14 w-14" />
-            <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h3 className="truncate font-bold">{item.spotlightActive ? "✨ " : ""}{item.handleName}</h3>{item.tagline ? <span className="rounded-full bg-white/75 px-2 py-1 text-xs text-stone-700">{item.tagline}</span> : null}</div><p className="mt-1 text-sm font-bold text-stone-700">{item.moodIcon ? `${item.moodIcon} ${item.moodLabel}` : "まだ気分未登録"}</p></div>
+            <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h3 className="truncate font-bold">{item.spotlightActive ? "✨ " : ""}{item.handleName}</h3>{item.tagline ? <span className="rounded-full bg-white/75 px-2 py-1 text-xs text-stone-700">{item.tagline}</span> : null}</div><p className="mt-1 text-sm font-bold text-stone-700">{item.moodIcon ? `${item.moodIcon} ${item.moodLabel}` : "まだ気分未登録"}{(item.likeCount ?? 0) > 0 ? `　♡${item.likeCount}` : ""}</p></div>
             <div className="shrink-0 text-right"><p className={`rounded-full px-3 py-1 text-xs font-black ${timeBadge}`}>{item.relativeTime}</p>{item.active && item.remainingTime ? <p className="mt-1 text-[11px] text-stone-500">残り {item.remainingTime}</p> : null}</div>
           </article>
         );

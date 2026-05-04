@@ -42,7 +42,7 @@ export default async function MoodPage({ searchParams }: MoodPageProps) {
         </p>
         {!profile.is_adult ? (
           <p className="mt-3 rounded-2xl bg-stone-100 px-4 py-3 text-sm font-bold text-stone-600">
-            20歳未満の場合、「飲み」は選べません。カフェは全年齢で選べる別のノリです。
+            20歳未満の場合、「飲み」は選べません。チルは全年齢で選べる別のノリです。
           </p>
         ) : null}
         {currentMood && previousMood ? (

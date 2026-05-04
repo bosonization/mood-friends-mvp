@@ -30,8 +30,27 @@ export type MoodStatus = {
   last_login_at: string;
   session_started_at: string;
   session_expires_at: string;
+  current_entry_id?: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type MoodEntry = {
+  id: string;
+  user_id: string;
+  mood_key: string;
+  started_at: string;
+  expires_at: string;
+  created_at: string;
+};
+
+export type MoodReaction = {
+  id: string;
+  mood_entry_id: string;
+  actor_id: string;
+  target_user_id: string;
+  reaction_type: "like";
+  created_at: string;
 };
 
 export type MoodSpotlight = {

@@ -26,9 +26,9 @@ export const MOODS = [
   },
   {
     key: "cafe",
-    icon: "☕",
-    label: "カフェ",
-    description: "だらっと話せるノリ"
+    icon: "🫧",
+    label: "チル",
+    description: "ゆるく落ち着きたいノリ"
   },
   {
     key: "walk",

@@ -12,7 +12,7 @@ import { formatRemainingTime, getMoodFreshness, isMoodSessionActive } from "@/li
 import { createClient } from "@/lib/supabase/server";
 import { getAndSyncLevelStatus } from "@/lib/level";
 import { normalizeViewMode } from "@/lib/viewMode";
-import type { Friendship, MoodSpotlight, MoodStatus, Profile } from "@/lib/types";
+import type { Friendship, MoodEntry, MoodReaction, MoodSpotlight, MoodStatus, Profile } from "@/lib/types";
 
 type HomePageProps = { searchParams: Promise<{ message?: string }> };
 
@@ -66,6 +66,48 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     .eq("spotlight_date", todayKey())
     .maybeSingle<MoodSpotlight>();
 
+  const { data: previousMoodEntry } = myMood?.current_entry_id
+    ? await supabase
+        .from("mood_entries")
+        .select("*")
+        .eq("user_id", user.id)
+        .neq("id", myMood.current_entry_id)
+        .order("started_at", { ascending: false })
+        .limit(1)
+        .maybeSingle<MoodEntry>()
+    : { data: null as MoodEntry | null };
+
+  const reactionEntryIds = [
+    myMood?.current_entry_id,
+    previousMoodEntry?.id,
+    ...(friendMoods ?? []).map((mood) => mood.current_entry_id)
+  ].filter(Boolean) as string[];
+
+  const { data: reactions } = reactionEntryIds.length
+    ? await supabase
+        .from("mood_reactions")
+        .select("*")
+        .in("mood_entry_id", reactionEntryIds)
+        .returns<MoodReaction[]>()
+    : { data: [] as MoodReaction[] };
+
+  const reactionActorIds = Array.from(new Set((reactions ?? []).map((reaction) => reaction.actor_id)));
+  const { data: reactionActors } = reactionActorIds.length
+    ? await supabase
+        .from("profiles")
+        .select("id, handle_name")
+        .in("id", reactionActorIds)
+        .returns<Pick<Profile, "id" | "handle_name">[]>()
+    : { data: [] as Pick<Profile, "id" | "handle_name">[] };
+
+  const reactionActorById = new Map((reactionActors ?? []).map((actor) => [actor.id, actor.handle_name]));
+  const reactionsByEntryId = new Map<string, MoodReaction[]>();
+  for (const reaction of reactions ?? []) {
+    const list = reactionsByEntryId.get(reaction.mood_entry_id) ?? [];
+    list.push(reaction);
+    reactionsByEntryId.set(reaction.mood_entry_id, list);
+  }
+
   const spotlightByUser = new Map((activeSpotlights ?? []).map((spotlight) => [spotlight.user_id, spotlight]));
   const moodByUser = new Map((friendMoods ?? []).map((mood) => [mood.user_id, mood]));
   const currentMood = getMood(myMood?.mood_key);
@@ -76,6 +118,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     const mood = getMood(friendMood?.mood_key);
     const active = isMoodSessionActive(friendMood);
     const spotlight = spotlightByUser.get(friend.id) ?? null;
+
+    const entryReactions = friendMood?.current_entry_id ? reactionsByEntryId.get(friendMood.current_entry_id) ?? [] : [];
 
     return {
       id: friend.id,
@@ -91,9 +135,24 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       active,
       freshness: getMoodFreshness(friendMood?.last_login_at),
       spotlightActive: Boolean(spotlight),
-      spotlightExpiresAt: spotlight?.expires_at ?? null
+      spotlightExpiresAt: spotlight?.expires_at ?? null,
+      currentEntryId: friendMood?.current_entry_id ?? null,
+      likedByMe: entryReactions.some((reaction) => reaction.actor_id === user.id),
+      likeCount: entryReactions.length
     };
   });
+
+  const currentMoodReactions = myMood?.current_entry_id ? reactionsByEntryId.get(myMood.current_entry_id) ?? [] : [];
+  const previousMoodReactions = previousMoodEntry?.id ? reactionsByEntryId.get(previousMoodEntry.id) ?? [] : [];
+  const previousMood = getMood(previousMoodEntry?.mood_key);
+  const likeSummary = {
+    currentCount: currentMoodReactions.length,
+    currentNames: currentMoodReactions.map((reaction) => reactionActorById.get(reaction.actor_id) ?? "友達"),
+    previousCount: previousMoodReactions.length,
+    previousNames: previousMoodReactions.map((reaction) => reactionActorById.get(reaction.actor_id) ?? "友達"),
+    previousMoodIcon: previousMood?.icon ?? null,
+    previousMoodLabel: previousMood?.label ?? null
+  };
 
   return (
     <AppShell>
@@ -120,6 +179,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             moodDescription={currentMood.description}
             remainingTime={formatRemainingTime(myMood)}
             spotlightActive={Boolean(mySpotlight)}
+            likeSummary={likeSummary}
           />
         ) : null}
 

@@ -2,6 +2,15 @@
 
 import { useMemo, useState } from "react";
 
+export type NoriLikeSummary = {
+  currentCount: number;
+  currentNames: string[];
+  previousCount: number;
+  previousNames: string[];
+  previousMoodIcon?: string | null;
+  previousMoodLabel?: string | null;
+};
+
 type NoriCardShareProps = {
   memberCode: string;
   handleName: string;
@@ -10,6 +19,7 @@ type NoriCardShareProps = {
   moodDescription: string;
   remainingTime?: string | null;
   spotlightActive?: boolean;
+  likeSummary?: NoriLikeSummary;
 };
 
 type InvitePayload = {
@@ -30,12 +40,16 @@ function getInviteUrl(token: string) {
   return `${window.location.origin}/invite/${token}`;
 }
 
-export function NoriCardShare({ memberCode, handleName, moodIcon, moodLabel, moodDescription, remainingTime, spotlightActive }: NoriCardShareProps) {
+export function NoriCardShare({ memberCode, handleName, moodIcon, moodLabel, moodDescription, remainingTime, spotlightActive, likeSummary }: NoriCardShareProps) {
   const [creating, setCreating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [showQr, setShowQr] = useState(false);
+  const [showLikes, setShowLikes] = useState(false);
+  const currentLikeCount = likeSummary?.currentCount ?? 0;
+  const previousLikeCount = likeSummary?.previousCount ?? 0;
+  const totalLikeCount = currentLikeCount + previousLikeCount;
 
   const baseMessage = useMemo(() => {
     return `${handleName}さんがeMooditionで今このノリを置いています。\n\n${moodIcon} ${moodLabel}\n${moodDescription}\n\n一緒に使うと、友達の「今どんなノリ？」がわかります。`;
@@ -110,6 +124,7 @@ export function NoriCardShare({ memberCode, handleName, moodIcon, moodLabel, moo
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-pink-600">Nori Card</p>
               {remainingTime ? <span className="rounded-full bg-gradient-to-r from-orange-500 via-pink-500 to-violet-600 px-2.5 py-1 text-[10px] font-black text-white shadow-sm">変更まで {remainingTime}</span> : null}
+              {totalLikeCount > 0 ? <button type="button" onClick={() => setShowLikes((current) => !current)} className="rounded-full bg-pink-50 px-2.5 py-1 text-[10px] font-black text-pink-700 shadow-sm">♡ 今{currentLikeCount} / 前{previousLikeCount}</button> : null}
               {spotlightActive ? <span className="rounded-full bg-fuchsia-50 px-2 py-0.5 text-[10px] font-black text-fuchsia-700">✨ Spotlight</span> : null}
               {expiresAt ? <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-black text-stone-500">招待期限 {formatExpiresAt(expiresAt)}</span> : null}
             </div>
@@ -130,6 +145,22 @@ export function NoriCardShare({ memberCode, handleName, moodIcon, moodLabel, moo
           </button>
         </div>
       </div>
+
+      {showLikes && totalLikeCount > 0 ? (
+        <div className="mt-3 rounded-[1.35rem] border border-pink-100 bg-pink-50/80 p-3">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-pink-600">Nori Likes</p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            <div className="rounded-2xl bg-white/80 p-3">
+              <p className="text-sm font-black text-stone-900">今のノリ ♡{currentLikeCount}</p>
+              <p className="mt-1 text-xs leading-5 text-stone-500">{likeSummary?.currentNames.length ? likeSummary.currentNames.join("、") : "まだいいねはありません"}</p>
+            </div>
+            <div className="rounded-2xl bg-white/80 p-3">
+              <p className="text-sm font-black text-stone-900">前のノリ {likeSummary?.previousMoodIcon ?? ""} {likeSummary?.previousMoodLabel ?? ""} ♡{previousLikeCount}</p>
+              <p className="mt-1 text-xs leading-5 text-stone-500">{likeSummary?.previousNames.length ? likeSummary.previousNames.join("、") : "まだいいねはありません"}</p>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {showQr && qrUrl ? (
         <div className="mt-3 flex flex-col gap-3 rounded-[1.35rem] border border-stone-100 bg-stone-950 p-3 text-white sm:flex-row sm:items-center">

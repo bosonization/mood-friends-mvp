@@ -47,6 +47,22 @@ export async function startMoodSession(formData: FormData) {
   const now = new Date();
   const expiresAt = new Date(now.getTime() + MOOD_SESSION_MINUTES * 60 * 1000);
 
+  const { data: entry, error: entryError } = await supabase
+    .from("mood_entries")
+    .insert({
+      user_id: user.id,
+      mood_key: moodKey,
+      started_at: now.toISOString(),
+      expires_at: expiresAt.toISOString(),
+      created_at: now.toISOString()
+    })
+    .select("id")
+    .single<{ id: string }>();
+
+  if (entryError || !entry) {
+    redirect(`/mood?message=${encodeURIComponent("今のノリの保存に失敗しました。Supabase SQLが未実行の可能性があります。")}`);
+  }
+
   const { error } = await supabase.from("mood_statuses").upsert(
     {
       user_id: user.id,
@@ -54,6 +70,7 @@ export async function startMoodSession(formData: FormData) {
       last_login_at: now.toISOString(),
       session_started_at: now.toISOString(),
       session_expires_at: expiresAt.toISOString(),
+      current_entry_id: entry.id,
       updated_at: now.toISOString()
     },
     { onConflict: "user_id" }
