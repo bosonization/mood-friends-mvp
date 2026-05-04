@@ -28,8 +28,17 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
         <form action={createProfile} className="mt-6 space-y-5">
           <AvatarUploader name="avatarUrl" handleName="user" />
           <label className="block text-sm font-bold">ハンドルネーム<input className="mt-2 w-full rounded-2xl border border-stone-200 px-4 py-3 outline-none focus:border-pink-400" name="handleName" maxLength={30} required placeholder="例：yuki" /></label>
-          <label className="block text-sm font-bold">一言（15文字以下）<input className="mt-2 w-full rounded-2xl border border-stone-200 px-4 py-3 outline-none focus:border-pink-400" name="tagline" maxLength={15} placeholder="例：夜ごはん行きたい" /></label>
-          <label className="flex items-start gap-3 rounded-2xl border border-orange-100 bg-orange-50/70 p-4 text-sm"><input name="isAdult" type="checkbox" className="mt-1" /><span>20歳以上です<span className="block text-xs text-stone-500">お酒アイコンの扱いを安全にするため、正式版では年齢確認を強化してください。</span></span></label>
+          <label className="block text-sm font-bold">一言（15文字以下）<input className="mt-2 w-full rounded-2xl border border-stone-200 px-4 py-3 outline-none focus:border-pink-400" name="tagline" maxLength={15} placeholder="例：今のノリ置いてる" /></label>
+
+          <div className="rounded-2xl border border-orange-100 bg-orange-50/70 p-4 text-sm">
+            <p className="font-bold">年齢区分</p>
+            <p className="mt-1 text-xs leading-5 text-stone-500">20歳未満でも利用できます。20歳未満には、お酒に関する表示はカフェとして安全に表示されます。</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-white bg-white/75 p-3"><input name="ageGroup" value="adult20" type="radio" className="mt-1" required /><span><span className="block font-bold">20歳以上</span><span className="text-xs text-stone-500">お酒表示が使えます</span></span></label>
+              <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-white bg-white/75 p-3"><input name="ageGroup" value="under20" type="radio" className="mt-1" required /><span><span className="block font-bold">20歳未満</span><span className="text-xs text-stone-500">カフェ表示になります</span></span></label>
+            </div>
+          </div>
+
           <label className="flex items-start gap-3 rounded-2xl border border-stone-200 bg-white p-4 text-sm">
             <input name="terms" type="checkbox" className="mt-1" required />
             <span><TransitionLink href="/terms" className="font-bold underline">利用規約</TransitionLink>・<TransitionLink href="/privacy" className="font-bold underline">プライバシーポリシー</TransitionLink>に同意します。</span>

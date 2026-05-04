@@ -3,22 +3,26 @@
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import type { MoodKey } from "@/lib/moods";
-import { MOODS } from "@/lib/moods";
+import { getSelectableMoods } from "@/lib/moods";
 import { startMoodSession } from "@/app/mood/actions";
 import { SubmitButton } from "@/components/SubmitButton";
 
-type MoodSelectionFormProps = { previousMoodKey?: string | null };
+type MoodSelectionFormProps = {
+  previousMoodKey?: string | null;
+  isAdult: boolean;
+};
 
-export function MoodSelectionForm({ previousMoodKey }: MoodSelectionFormProps) {
+export function MoodSelectionForm({ previousMoodKey, isAdult }: MoodSelectionFormProps) {
   const [selectedMoodKey, setSelectedMoodKey] = useState<MoodKey | "">("");
-  const selectedMood = MOODS.find((mood) => mood.key === selectedMoodKey);
+  const moods = getSelectableMoods(isAdult);
+  const selectedMood = moods.find((mood) => mood.key === selectedMoodKey);
 
   return (
     <form action={startMoodSession} className="mt-7 space-y-6">
       <input type="hidden" name="moodKey" value={selectedMoodKey} />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {MOODS.map((mood) => {
+        {moods.map((mood) => {
           const isSelected = mood.key === selectedMoodKey;
           const wasPrevious = mood.key === previousMoodKey;
           return (

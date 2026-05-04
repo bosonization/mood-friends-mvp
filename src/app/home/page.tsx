@@ -42,10 +42,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     : { data: [] as MoodStatus[] };
 
   const moodByUser = new Map((friendMoods ?? []).map((mood) => [mood.user_id, mood]));
-  const currentMood = getMood(myMood?.mood_key);
+  const currentMood = getMood(myMood?.mood_key, { viewerIsAdult: profile.is_adult, ownerIsAdult: profile.is_adult });
   const friendsForView: FriendMoodViewItem[] = (friendProfiles ?? []).map((friend) => {
     const friendMood = moodByUser.get(friend.id);
-    const mood = getMood(friendMood?.mood_key);
+    const mood = getMood(friendMood?.mood_key, { viewerIsAdult: profile.is_adult, ownerIsAdult: friend.is_adult });
     const active = isMoodSessionActive(friendMood);
 
     return {
