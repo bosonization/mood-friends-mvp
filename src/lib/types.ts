@@ -8,6 +8,7 @@ export type Profile = {
   avatar_url: string | null;
   is_adult: boolean;
   display_mode?: ViewMode | null;
+  max_level?: number | null;
   terms_agreed_at: string;
   created_at: string;
   updated_at: string;
@@ -31,4 +32,13 @@ export type MoodStatus = {
   session_expires_at: string;
   created_at: string;
   updated_at: string;
+};
+
+export type MoodSpotlight = {
+  id: string;
+  user_id: string;
+  spotlight_date: string;
+  started_at: string;
+  expires_at: string;
+  created_at: string;
 };

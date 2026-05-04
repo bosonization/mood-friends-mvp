@@ -36,10 +36,9 @@ export function ContactActionPanel(props: ContactActionPanelProps) {
         await navigator.share({ text: message });
         return;
       } catch {
-        // User cancelled or the native share sheet failed. Fall back to copy.
+        // fall through
       }
     }
-
     await copyMessage();
   }
 
@@ -54,39 +53,13 @@ export function ContactActionPanel(props: ContactActionPanelProps) {
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2 text-center text-[12px] font-black">
-        <button
-          type="button"
-          onClick={handleShare}
-          className="rounded-2xl bg-gradient-to-r from-fuchsia-500 to-violet-500 px-3 py-3 text-white shadow-lg shadow-fuchsia-100 transition hover:scale-[1.02]"
-        >
-          共有
-        </button>
-        <a
-          href={`https://line.me/R/share?text=${encodedMessage}`}
-          target="_blank"
-          rel="noreferrer"
-          className="rounded-2xl bg-[#06C755] px-3 py-3 text-white shadow-lg shadow-emerald-100 transition hover:scale-[1.02]"
-        >
-          LINE
-        </a>
-        <a
-          href={`sms:?&body=${encodedMessage}`}
-          className="rounded-2xl bg-gradient-to-r from-sky-500 to-cyan-500 px-3 py-3 text-white shadow-lg shadow-sky-100 transition hover:scale-[1.02]"
-        >
-          SMS
-        </a>
-        <button
-          type="button"
-          onClick={copyMessage}
-          className="rounded-2xl border border-stone-200 bg-white px-3 py-3 text-stone-800 shadow-sm transition hover:scale-[1.02] hover:bg-stone-50"
-        >
-          文面コピー
-        </button>
+        <button type="button" onClick={handleShare} className="rounded-2xl bg-gradient-to-r from-fuchsia-500 to-violet-500 px-3 py-3 text-white shadow-lg shadow-fuchsia-100 transition hover:scale-[1.02]">共有</button>
+        <a href={`https://line.me/R/share?text=${encodedMessage}`} target="_blank" rel="noreferrer" className="rounded-2xl bg-[#06C755] px-3 py-3 text-white shadow-lg shadow-emerald-100 transition hover:scale-[1.02]">LINE</a>
+        <a href={`sms:?&body=${encodedMessage}`} className="rounded-2xl bg-gradient-to-r from-sky-500 to-cyan-500 px-3 py-3 text-white shadow-lg shadow-sky-100 transition hover:scale-[1.02]">SMS</a>
+        <button type="button" onClick={copyMessage} className="rounded-2xl border border-stone-200 bg-white px-3 py-3 text-stone-800 shadow-sm transition hover:scale-[1.02] hover:bg-stone-50">文面コピー</button>
       </div>
 
-      <p className="mt-3 text-[10px] leading-5 text-stone-500">
-        連絡は、すでに知っている相手に外部アプリで行ってください。eMooditionはチャット・DM・連絡先交換機能を提供していません。Instagramは「共有」から選べます。
-      </p>
+      <p className="mt-3 text-[10px] leading-5 text-stone-500">連絡は、すでに知っている相手に外部アプリで行ってください。eMooditionはチャット・DM・連絡先交換機能を提供していません。</p>
     </div>
   );
 }

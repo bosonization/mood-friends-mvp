@@ -2,17 +2,23 @@ import { redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { Avatar } from "@/components/Avatar";
 import { CopyButton } from "@/components/CopyButton";
-import { ShareInviteButton } from "@/components/ShareInviteButton";
 import { FormMessage } from "@/components/FormMessage";
 import { FriendsMoodDisplay, type FriendMoodViewItem } from "@/components/FriendsMoodDisplay";
+import { LevelCard } from "@/components/LevelCard";
+import { ShareInviteButton } from "@/components/ShareInviteButton";
 import { getMood } from "@/lib/moods";
 import { formatRelativeTime } from "@/lib/safety";
 import { formatRemainingTime, getMoodFreshness, isMoodSessionActive } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
+import { getAndSyncLevelStatus } from "@/lib/level";
 import { normalizeViewMode } from "@/lib/viewMode";
-import type { Friendship, MoodStatus, Profile } from "@/lib/types";
+import type { Friendship, MoodSpotlight, MoodStatus, Profile } from "@/lib/types";
 
 type HomePageProps = { searchParams: Promise<{ message?: string }> };
+
+function todayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const params = await searchParams;
@@ -22,6 +28,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle<Profile>();
   if (!profile || profile.deleted_at) redirect("/onboarding");
+
+  const levelStatus = await getAndSyncLevelStatus(supabase, user.id, profile.max_level);
 
   const { data: myMood } = await supabase.from("mood_statuses").select("*").eq("user_id", user.id).maybeSingle<MoodStatus>();
   if (!isMoodSessionActive(myMood)) redirect("/mood");
@@ -41,12 +49,33 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     ? await supabase.from("mood_statuses").select("*").in("user_id", friendIds).returns<MoodStatus[]>()
     : { data: [] as MoodStatus[] };
 
+  const spotlightIds = [user.id, ...friendIds];
+  const { data: activeSpotlights } = spotlightIds.length
+    ? await supabase
+        .from("mood_spotlights")
+        .select("*")
+        .in("user_id", spotlightIds)
+        .gt("expires_at", new Date().toISOString())
+        .returns<MoodSpotlight[]>()
+    : { data: [] as MoodSpotlight[] };
+
+  const { data: todaySpotlight } = await supabase
+    .from("mood_spotlights")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("spotlight_date", todayKey())
+    .maybeSingle<MoodSpotlight>();
+
+  const spotlightByUser = new Map((activeSpotlights ?? []).map((spotlight) => [spotlight.user_id, spotlight]));
   const moodByUser = new Map((friendMoods ?? []).map((mood) => [mood.user_id, mood]));
-  const currentMood = getMood(myMood?.mood_key, { viewerIsAdult: profile.is_adult, ownerIsAdult: profile.is_adult });
+  const currentMood = getMood(myMood?.mood_key);
+  const mySpotlight = spotlightByUser.get(user.id) ?? null;
+
   const friendsForView: FriendMoodViewItem[] = (friendProfiles ?? []).map((friend) => {
     const friendMood = moodByUser.get(friend.id);
-    const mood = getMood(friendMood?.mood_key, { viewerIsAdult: profile.is_adult, ownerIsAdult: friend.is_adult });
+    const mood = getMood(friendMood?.mood_key);
     const active = isMoodSessionActive(friendMood);
+    const spotlight = spotlightByUser.get(friend.id) ?? null;
 
     return {
       id: friend.id,
@@ -60,13 +89,24 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       relativeTime: formatRelativeTime(friendMood?.last_login_at),
       remainingTime: active ? formatRemainingTime(friendMood) : null,
       active,
-      freshness: getMoodFreshness(friendMood?.last_login_at)
+      freshness: getMoodFreshness(friendMood?.last_login_at),
+      spotlightActive: Boolean(spotlight),
+      spotlightExpiresAt: spotlight?.expires_at ?? null
     };
   });
 
   return (
     <AppShell>
       <div className="space-y-6">
+        <LevelCard
+          status={levelStatus}
+          memberCode={profile.member_code}
+          handleName={profile.handle_name}
+          hasActiveMood={isMoodSessionActive(myMood)}
+          spotlightActive={Boolean(mySpotlight)}
+          spotlightUsedToday={Boolean(todaySpotlight)}
+        />
+
         <FriendsMoodDisplay items={friendsForView} initialViewMode={normalizeViewMode(profile.display_mode)} inviteCode={profile.member_code} ownerName={profile.handle_name} />
 
         <section className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
@@ -82,7 +122,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <div className="mt-6 rounded-[1.7rem] bg-stone-950 p-5 text-white shadow-lg">
             <div className="flex items-start justify-between gap-4">
               <div><p className="text-sm text-stone-300">現在の10分セッション</p><div className="mt-3 flex items-center gap-3"><span className="text-5xl">{currentMood?.icon}</span><div><h1 className="text-2xl font-black">{currentMood?.label}</h1><p className="text-sm text-stone-300">{currentMood?.description}</p></div></div></div>
-              <div className="rounded-2xl bg-white/10 px-3 py-2 text-right text-sm"><p className="text-stone-400">残り</p><p className="font-black">{formatRemainingTime(myMood)}</p></div>
+              <div className="rounded-2xl bg-white/10 px-3 py-2 text-right text-sm"><p className="text-stone-400">残り</p><p className="font-black">{formatRemainingTime(myMood)}</p>{mySpotlight ? <p className="mt-1 text-xs text-fuchsia-200">Spotlight中</p> : null}</div>
             </div>
             <p className="mt-4 text-xs text-stone-400">セッション開始: {formatRelativeTime(myMood?.session_started_at)}</p>
             <p className="mt-2 text-xs text-stone-500">セッション中は気分を変更できません。</p>

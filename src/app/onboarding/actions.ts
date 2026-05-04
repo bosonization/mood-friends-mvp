@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { hasContactLikeText } from "@/lib/safety";
+import { hasContactLikeText, normalizeMemberCode } from "@/lib/safety";
 
 const schema = z.object({
   handleName: z.string().trim().min(1, "ハンドルネームを入力してください").max(30, "ハンドルネームは30文字以内です"),
@@ -12,12 +12,13 @@ const schema = z.object({
   isAdult: z.boolean().default(false)
 });
 
-function parseIsAdult(formData: FormData) {
-  const ageGroup = String(formData.get("ageGroup") ?? "");
-  if (ageGroup === "adult20") return true;
-  if (ageGroup === "under20") return false;
-  return formData.get("isAdult") === "on";
+async function registerReferral(supabase: Awaited<ReturnType<typeof createClient>>, inviteCodeRaw: string) {
+  const inviteCode = normalizeMemberCode(inviteCodeRaw);
+  if (inviteCode.length !== 10) return;
+
+  await supabase.rpc("record_referral_by_code", { target_code: inviteCode });
 }
+
 
 export async function createProfile(formData: FormData) {
   const supabase = await createClient();
@@ -32,7 +33,7 @@ export async function createProfile(formData: FormData) {
     handleName: String(formData.get("handleName") ?? ""),
     tagline: String(formData.get("tagline") ?? ""),
     avatarUrl: String(formData.get("avatarUrl") ?? ""),
-    isAdult: parseIsAdult(formData)
+    isAdult: formData.get("isAdult") === "on"
   });
 
   if (!parsed.success) {
@@ -51,13 +52,19 @@ export async function createProfile(formData: FormData) {
     avatar_url: avatarUrl || null,
     is_adult: isAdult,
     terms_agreed_at: new Date().toISOString(),
-    deleted_at: null
+    deleted_at: null,
+    max_level: 1
   });
 
   if (error) {
-    redirect(`/onboarding?message=${encodeURIComponent("プロフィール作成に失敗しました。")}`);
+    redirect(`/onboarding?message=${encodeURIComponent("プロフィール作成に失敗しました。Supabase SQLが未実行の可能性があります。")}`);
   }
 
-  await supabase.from("terms_consents").insert({ user_id: user.id, terms_version: "2026-05-03" });
+  await supabase.from("terms_consents").insert({ user_id: user.id, terms_version: "2026-05-04" });
+
+  const inviteFromForm = String(formData.get("inviteCode") ?? "");
+  const inviteFromMetadata = typeof user.user_metadata?.invite_code === "string" ? user.user_metadata.invite_code : "";
+  await registerReferral(supabase, inviteFromForm || inviteFromMetadata);
+
   redirect("/mood");
 }

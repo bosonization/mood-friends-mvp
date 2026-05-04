@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isMoodKey, type MoodKey } from "@/lib/moods";
+import { getAndSyncLevelStatus, isMoodUnlocked } from "@/lib/level";
 import { isMoodSessionActive, MOOD_SESSION_MINUTES } from "@/lib/session";
 
 export async function startMoodSession(formData: FormData) {
@@ -12,11 +13,13 @@ export async function startMoodSession(formData: FormData) {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, is_adult, deleted_at")
+    .select("id, is_adult, deleted_at, max_level")
     .eq("id", user.id)
-    .maybeSingle<{ id: string; is_adult: boolean; deleted_at: string | null }>();
+    .maybeSingle<{ id: string; is_adult: boolean; deleted_at: string | null; max_level: number | null }>();
 
   if (!profile || profile.deleted_at) redirect("/onboarding");
+
+  const levelStatus = await getAndSyncLevelStatus(supabase, user.id, profile.max_level);
 
   const { data: current } = await supabase
     .from("mood_statuses")
@@ -33,9 +36,14 @@ export async function startMoodSession(formData: FormData) {
     redirect(`/mood?message=${encodeURIComponent("気分を選択してください。")}`);
   }
 
-  // Important:
-  // Under-20 users may select the internal `drink` key, but it is displayed as ☕ カフェ.
-  // Do not block `drink` for under-20 users here. Rendering handles age-safe wording.
+  if (!isMoodUnlocked(moodKey, levelStatus.level)) {
+    redirect(`/mood?message=${encodeURIComponent(`この気分はLv${levelStatus.level}ではまだ選べません。`)}`);
+  }
+
+  if (moodKey === "drink" && !profile.is_adult) {
+    redirect(`/mood?message=${encodeURIComponent("お酒アイコンを選ぶには、プロフィールで20歳以上にチェックしてください。")}`);
+  }
+
   const now = new Date();
   const expiresAt = new Date(now.getTime() + MOOD_SESSION_MINUTES * 60 * 1000);
 
