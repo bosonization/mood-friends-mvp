@@ -3,6 +3,7 @@ import { AppShell } from "@/components/AppShell";
 import { Avatar } from "@/components/Avatar";
 import { CopyButton } from "@/components/CopyButton";
 import { FormMessage } from "@/components/FormMessage";
+import { ShareInviteButton } from "@/components/ShareInviteButton";
 import { SubmitButton } from "@/components/SubmitButton";
 import { acceptFriend, deleteFriend, rejectFriend, requestFriend } from "./actions";
 import { createClient } from "@/lib/supabase/server";
@@ -19,7 +20,13 @@ export default async function FriendsPage({ searchParams }: FriendsPageProps) {
   const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle<Profile>();
   if (!profile) redirect("/onboarding");
 
-  const { data: friendships } = await supabase.from("friendships").select("*").or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`).order("updated_at", { ascending: false }).returns<Friendship[]>();
+  const { data: friendships } = await supabase
+    .from("friendships")
+    .select("*")
+    .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+    .order("updated_at", { ascending: false })
+    .returns<Friendship[]>();
+
   const relatedIds = Array.from(new Set((friendships ?? []).map((friendship) => friendship.requester_id === user.id ? friendship.addressee_id : friendship.requester_id)));
   const { data: relatedProfiles } = relatedIds.length ? await supabase.from("profiles").select("*").in("id", relatedIds).returns<Profile[]>() : { data: [] as Profile[] };
   const profileById = new Map((relatedProfiles ?? []).map((item) => [item.id, item]));
@@ -31,16 +38,23 @@ export default async function FriendsPage({ searchParams }: FriendsPageProps) {
   return (
     <AppShell>
       <div className="grid gap-6 lg:grid-cols-[0.86fr_1.14fr]">
-        <section className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
-          <p className="text-sm font-bold text-pink-700">Friend Code</p>
-          <h1 className="text-2xl font-black">会員コードで友達申請</h1>
-          <p className="mt-2 text-sm leading-6 text-stone-600">10桁の会員コードを知っている相手にだけ申請できます。公開検索はありません。</p>
-          <div className="mt-5 rounded-[1.7rem] bg-stone-950 p-5 text-white"><p className="text-sm text-stone-300">あなたの会員コード</p><div className="mt-2 flex flex-wrap items-center gap-3"><p className="font-mono text-3xl font-black tracking-widest">{profile.member_code}</p><CopyButton value={profile.member_code} /></div></div>
-          <form action={requestFriend} className="mt-5 space-y-3">
-            <label className="block text-sm font-bold">相手の会員コード<input className="mt-2 w-full rounded-2xl border border-stone-200 px-4 py-3 font-mono tracking-widest outline-none focus:border-pink-400" name="memberCode" inputMode="numeric" maxLength={10} placeholder="1234567890" required /></label>
-            <SubmitButton pendingText="申請中..." className="w-full rounded-2xl bg-gradient-to-r from-orange-500 via-pink-500 to-violet-600 px-5 py-3 font-black text-white shadow-lg shadow-pink-100">申請する</SubmitButton>
-          </form>
-          <div className="mt-5"><FormMessage message={params.message} /></div>
+        <section className="space-y-5">
+          <div className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
+            <p className="text-sm font-bold text-pink-700">Friend Code</p>
+            <h1 className="text-2xl font-black">会員コードで友達申請</h1>
+            <p className="mt-2 text-sm leading-6 text-stone-600">10桁の会員コードを知っている相手にだけ申請できます。公開検索はありません。</p>
+            <div className="mt-5 rounded-[1.7rem] bg-stone-950 p-5 text-white">
+              <p className="text-sm text-stone-300">あなたの会員コード</p>
+              <div className="mt-2 flex flex-wrap items-center gap-3"><p className="font-mono text-3xl font-black tracking-widest">{profile.member_code}</p><CopyButton value={profile.member_code} /></div>
+            </div>
+            <form action={requestFriend} className="mt-5 space-y-3">
+              <label className="block text-sm font-bold">相手の会員コード<input className="mt-2 w-full rounded-2xl border border-stone-200 px-4 py-3 font-mono tracking-widest outline-none focus:border-pink-400" name="memberCode" inputMode="numeric" maxLength={10} placeholder="1234567890" required /></label>
+              <SubmitButton pendingText="申請中..." className="w-full rounded-2xl bg-gradient-to-r from-orange-500 via-pink-500 to-violet-600 px-5 py-3 font-black text-white shadow-lg shadow-pink-100">申請する</SubmitButton>
+            </form>
+            <div className="mt-5"><FormMessage message={params.message} /></div>
+          </div>
+
+          <ShareInviteButton memberCode={profile.member_code} handleName={profile.handle_name} variant="card" />
         </section>
 
         <section className="space-y-5">

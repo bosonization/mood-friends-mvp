@@ -1,7 +1,7 @@
 import { ShareInviteButton } from "@/components/ShareInviteButton";
 import { SubmitButton } from "@/components/SubmitButton";
 import { startSpotlight } from "@/app/home/actions";
-import type { LevelStatus } from "@/lib/level";
+import type { LevelStatus, UserLevel } from "@/lib/level";
 
 type LevelCardProps = {
   status: LevelStatus;
@@ -12,25 +12,54 @@ type LevelCardProps = {
   spotlightUsedToday: boolean;
 };
 
-function getProgressPercent(status: LevelStatus) {
-  if (status.level >= 5) return 100;
-  if (status.level === 4) return status.needsReferralForLv5 ? 84 : 78;
-  if (status.level === 3) return 62;
-  if (status.level === 2) return 42;
-  return 18;
+const growthSteps: Array<{ level: UserLevel; title: string; unlock: string }> = [
+  { level: 1, title: "Lv1", unlock: "4気分" },
+  { level: 2, title: "Lv2", unlock: "+散歩" },
+  { level: 3, title: "Lv3", unlock: "+作業" },
+  { level: 4, title: "Lv4", unlock: "全気分" }
+];
+
+function getNextText(status: LevelStatus) {
+  if (status.level <= 1) return "友達を1人追加すると、散歩が解放されます。";
+  if (status.level <= 2) return "友達を2人にすると、作業が解放されます。";
+  if (status.level <= 3) return "友達を3人にすると、お酒・ウキウキを含む全気分が解放されます。";
+  return "全気分は解放済み。招待コード経由で1人登録されると、Spotlightが解放されます。";
 }
 
-export function LevelCard({ status, memberCode, handleName, hasActiveMood, spotlightActive, spotlightUsedToday }: LevelCardProps) {
+function getLv5ButtonText({ status, hasActiveMood, spotlightActive, spotlightUsedToday }: LevelCardProps) {
+  if (status.level < 5) return "Lv5で解放";
+  if (!hasActiveMood) return "気分登録後に使用";
+  if (spotlightActive) return "Spotlight中";
+  if (spotlightUsedToday) return "今日は使用済み";
+  return "Spotlightを使う";
+}
+
+export function LevelCard(props: LevelCardProps) {
+  const { status, memberCode, handleName, hasActiveMood, spotlightActive, spotlightUsedToday } = props;
   const canUseSpotlight = status.level >= 5 && hasActiveMood && !spotlightActive && !spotlightUsedToday;
-  const disabledReason = status.level < 5
-    ? "Lv5で解放"
-    : !hasActiveMood
-      ? "気分セッション開始後に使用できます"
-      : spotlightActive
-        ? "Spotlight中"
-        : spotlightUsedToday
-          ? "今日は使用済み"
-          : "";
+
+  if (status.level >= 5) {
+    return (
+      <section className="rounded-[2rem] border border-fuchsia-100 bg-[radial-gradient(circle_at_20%_0%,rgba(217,70,239,0.18),transparent_34%),rgba(255,255,255,0.86)] p-5 shadow-sm backdrop-blur-xl">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-black text-fuchsia-700">Lv5 Spotlight</p>
+            <h2 className="mt-1 text-2xl font-black">今日のノリを30分だけ強調</h2>
+            <p className="mt-2 text-sm leading-6 text-stone-600">友達のMood Orbit上で、あなたのバブルが特別表示されます。通知やDMは送りません。</p>
+          </div>
+          <form action={startSpotlight}>
+            <SubmitButton
+              disabled={!canUseSpotlight}
+              pendingText="発動中..."
+              className="rounded-2xl bg-gradient-to-r from-fuchsia-500 to-violet-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-fuchsia-100 disabled:cursor-not-allowed disabled:opacity-45"
+            >
+              {getLv5ButtonText(props)}
+            </SubmitButton>
+          </form>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
@@ -38,50 +67,37 @@ export function LevelCard({ status, memberCode, handleName, hasActiveMood, spotl
         <div>
           <p className="text-sm font-black text-pink-700">Growth</p>
           <h2 className="mt-1 text-2xl font-black">Lv{status.level} {status.label}</h2>
-          <p className="mt-2 max-w-xl text-sm leading-6 text-stone-600">{status.nextMessage}</p>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-stone-600">{getNextText(status)}</p>
         </div>
-        <div className="rounded-[1.4rem] bg-stone-950 px-4 py-3 text-right text-white">
-          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-stone-400">Progress</p>
-          <p className="text-lg font-black">{status.friendCount}/3 友達</p>
-          <p className="text-xs text-stone-400">招待登録 {status.referralCount}/1</p>
-        </div>
+        <ShareInviteButton memberCode={memberCode} handleName={handleName} />
       </div>
 
-      <div className="mt-5 h-3 overflow-hidden rounded-full bg-stone-100">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-orange-400 via-pink-500 to-violet-600 transition-all"
-          style={{ width: `${getProgressPercent(status)}%` }}
-        />
-      </div>
-
-      <div className="mt-5 grid gap-3 lg:grid-cols-[1fr_0.95fr]">
-        <div className="rounded-[1.45rem] border border-orange-100 bg-orange-50/70 p-4">
-          <p className="text-sm font-black text-orange-900">次の解放</p>
-          {status.level < 4 ? (
-            <p className="mt-2 text-sm leading-6 text-stone-700">友達を増やすと、選べる気分が増えます。Lv4で「お酒」「ウキウキ」を含む全8気分が解放されます。</p>
-          ) : status.level < 5 ? (
-            <p className="mt-2 text-sm leading-6 text-stone-700">全気分は解放済みです。招待コード経由で1人登録されると、Lv5 Spotlightが解放されます。</p>
-          ) : (
-            <p className="mt-2 text-sm leading-6 text-stone-700">1日1回、30分間だけ自分のバブルを友達のOrbitで特別表示できます。</p>
-          )}
-          <div className="mt-3">
-            <ShareInviteButton memberCode={memberCode} handleName={handleName} />
-          </div>
-        </div>
-
-        <div className="rounded-[1.45rem] border border-fuchsia-100 bg-fuchsia-50/70 p-4">
-          <p className="text-sm font-black text-fuchsia-900">Lv5 Spotlight</p>
-          <p className="mt-2 text-sm leading-6 text-stone-700">友達のMood Orbit上で、あなたの気分を30分間だけ強調します。通知やDMは送りません。</p>
-          <form action={startSpotlight} className="mt-3">
-            <SubmitButton
-              disabled={!canUseSpotlight}
-              pendingText="発動中..."
-              className="w-full rounded-2xl bg-gradient-to-r from-fuchsia-500 to-violet-600 px-4 py-3 text-sm font-black text-white shadow-lg shadow-fuchsia-100 disabled:cursor-not-allowed disabled:opacity-45"
+      <div className="mt-5 grid grid-cols-4 gap-2">
+        {growthSteps.map((step) => {
+          const reached = status.level >= step.level;
+          const current = status.level === step.level;
+          return (
+            <div
+              key={step.level}
+              className={`rounded-[1.25rem] border p-3 text-center transition ${
+                reached
+                  ? current
+                    ? "border-pink-200 bg-pink-50 ring-4 ring-pink-100"
+                    : "border-emerald-200 bg-emerald-50"
+                  : "border-stone-100 bg-stone-50/80 opacity-65"
+              }`}
             >
-              {canUseSpotlight ? "Spotlightを使う" : disabledReason}
-            </SubmitButton>
-          </form>
-        </div>
+              <p className={`text-sm font-black ${reached ? "text-stone-900" : "text-stone-400"}`}>{step.title}</p>
+              <p className={`mt-1 text-[11px] font-bold ${reached ? "text-stone-600" : "text-stone-400"}`}>{step.unlock}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="mt-4 rounded-[1.25rem] border border-orange-100 bg-orange-50/75 p-4 text-sm leading-6 text-stone-700">
+        <p className="font-black text-orange-900">次の解放</p>
+        <p className="mt-1">{getNextText(status)}</p>
+        <p className="mt-2 text-xs text-stone-500">現在：友達 {status.friendCount}/3、招待登録 {status.referralCount}/1</p>
       </div>
     </section>
   );

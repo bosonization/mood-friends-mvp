@@ -1,11 +1,9 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { Avatar } from "@/components/Avatar";
-import { CopyButton } from "@/components/CopyButton";
 import { FormMessage } from "@/components/FormMessage";
 import { FriendsMoodDisplay, type FriendMoodViewItem } from "@/components/FriendsMoodDisplay";
 import { LevelCard } from "@/components/LevelCard";
-import { ShareInviteButton } from "@/components/ShareInviteButton";
 import { getMood } from "@/lib/moods";
 import { formatRelativeTime } from "@/lib/safety";
 import { formatRemainingTime, getMoodFreshness, isMoodSessionActive } from "@/lib/session";
@@ -113,20 +111,18 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <div className="flex items-center gap-4">
             <Avatar src={profile.avatar_url} name={profile.handle_name} size="lg" />
             <div className="min-w-0 flex-1">
-              <p className="text-sm text-stone-500">あなたの会員コード</p>
-              <div className="mt-1 flex flex-wrap items-center gap-2"><p className="font-mono text-2xl font-black tracking-widest">{profile.member_code}</p><CopyButton value={profile.member_code} /><ShareInviteButton memberCode={profile.member_code} handleName={profile.handle_name} /></div>
-              <p className="mt-1 text-sm text-stone-600">{profile.tagline || "一言未設定"}</p>
+              <p className="text-sm font-black text-pink-700">あなたの今</p>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <span className="text-5xl">{currentMood?.icon}</span>
+                <div>
+                  <h2 className="text-2xl font-black">{currentMood?.label}</h2>
+                  <p className="text-sm text-stone-500">変更まであと {formatRemainingTime(myMood)}</p>
+                </div>
+              </div>
+              {mySpotlight ? <p className="mt-3 inline-flex rounded-full bg-fuchsia-50 px-3 py-1 text-xs font-black text-fuchsia-700">✨ Spotlight中</p> : null}
             </div>
           </div>
           <div className="mt-5"><FormMessage message={params.message} /></div>
-          <div className="mt-6 rounded-[1.7rem] bg-stone-950 p-5 text-white shadow-lg">
-            <div className="flex items-start justify-between gap-4">
-              <div><p className="text-sm text-stone-300">現在の10分セッション</p><div className="mt-3 flex items-center gap-3"><span className="text-5xl">{currentMood?.icon}</span><div><h1 className="text-2xl font-black">{currentMood?.label}</h1><p className="text-sm text-stone-300">{currentMood?.description}</p></div></div></div>
-              <div className="rounded-2xl bg-white/10 px-3 py-2 text-right text-sm"><p className="text-stone-400">残り</p><p className="font-black">{formatRemainingTime(myMood)}</p>{mySpotlight ? <p className="mt-1 text-xs text-fuchsia-200">Spotlight中</p> : null}</div>
-            </div>
-            <p className="mt-4 text-xs text-stone-400">セッション開始: {formatRelativeTime(myMood?.session_started_at)}</p>
-            <p className="mt-2 text-xs text-stone-500">セッション中は気分を変更できません。</p>
-          </div>
         </section>
       </div>
     </AppShell>
