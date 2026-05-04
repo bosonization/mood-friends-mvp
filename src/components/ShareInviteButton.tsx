@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 type ShareInviteButtonProps = {
   memberCode: string;
@@ -8,59 +8,105 @@ type ShareInviteButtonProps = {
   variant?: "compact" | "card";
 };
 
-function buildInvitePath(memberCode: string) {
-  return `/invite/${memberCode}`;
+type InvitePayload = {
+  token: string;
+  expiresAt: string;
+  memberCode: string;
+};
+
+function buildAbsoluteInviteUrl(token: string) {
+  return `${window.location.origin}/invite/${token}`;
 }
 
-function buildAbsoluteInviteUrl(memberCode: string) {
-  if (typeof window === "undefined") return buildInvitePath(memberCode);
-  return `${window.location.origin}${buildInvitePath(memberCode)}`;
+function formatExpiresAt(input: string) {
+  try {
+    return new Date(input).toLocaleString("ja-JP", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  } catch {
+    return "24時間以内";
+  }
 }
 
 export function ShareInviteButton({ memberCode, handleName, variant = "compact" }: ShareInviteButtonProps) {
   const [copied, setCopied] = useState(false);
-  const [inviteUrl, setInviteUrl] = useState(buildInvitePath(memberCode));
-
-  useEffect(() => {
-    setInviteUrl(buildAbsoluteInviteUrl(memberCode));
-  }, [memberCode]);
+  const [creating, setCreating] = useState(false);
+  const [lastExpiresAt, setLastExpiresAt] = useState<string | null>(null);
 
   const shareText = useMemo(() => {
     const from = handleName ? `${handleName}さんから` : "";
-    return `${from}eMooditionに招待しています。\n友達の「今どんなノリ？」がわかるアプリです。\n会員コード: ${memberCode}`;
+    return `${from}eMooditionに招待しています。\n友達の「今どんなノリ？」がわかるアプリです。\nこの招待リンクは24時間有効です。\n会員コード: ${memberCode}`;
   }, [handleName, memberCode]);
 
-  async function copyInvite() {
-    const text = `${shareText}\n${inviteUrl}`;
+  async function createInvite() {
+    setCreating(true);
     try {
-      await navigator.clipboard.writeText(text);
+      const response = await fetch("/api/invites/create", { method: "POST" });
+      const payload = (await response.json()) as Partial<InvitePayload> & { error?: string };
+
+      if (!response.ok || !payload.token || !payload.expiresAt) {
+        throw new Error(payload.error || "invite_create_failed");
+      }
+
+      setLastExpiresAt(payload.expiresAt);
+      return {
+        url: buildAbsoluteInviteUrl(payload.token),
+        expiresAt: payload.expiresAt
+      };
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  async function buildInviteMessage() {
+    const invite = await createInvite();
+    return {
+      url: invite.url,
+      text: `${shareText}\n${invite.url}`,
+      expiresAt: invite.expiresAt
+    };
+  }
+
+  async function copyInvite() {
+    try {
+      const invite = await buildInviteMessage();
+      await navigator.clipboard.writeText(invite.text);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1400);
     } catch {
-      alert("コピーできませんでした。会員コードを手動でコピーしてください。");
+      alert("招待リンクを作成できませんでした。Supabase SQLが実行済みか確認してください。");
     }
   }
 
   async function nativeShare() {
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: "eMooditionに招待", text: shareText, url: buildAbsoluteInviteUrl(memberCode) });
-        return;
-      } catch {
+    try {
+      const invite = await buildInviteMessage();
+      if (navigator.share) {
+        await navigator.share({ title: "eMooditionに招待", text: shareText, url: invite.url });
         return;
       }
+      await navigator.clipboard.writeText(invite.text);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1400);
+    } catch {
+      alert("招待リンクを作成できませんでした。Supabase SQLが実行済みか確認してください。");
     }
-    await copyInvite();
   }
 
-  function openLineShare() {
-    const url = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(buildAbsoluteInviteUrl(memberCode))}`;
-    window.open(url, "_blank", "noopener,noreferrer");
+  async function openLineShare() {
+    try {
+      const invite = await buildInviteMessage();
+      window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(invite.url)}`, "_blank", "noopener,noreferrer");
+    } catch {
+      alert("招待リンクを作成できませんでした。Supabase SQLが実行済みか確認してください。");
+    }
   }
 
-  function openSmsShare() {
-    const text = `${shareText}\n${buildAbsoluteInviteUrl(memberCode)}`;
-    window.location.href = `sms:?&body=${encodeURIComponent(text)}`;
+  async function openSmsShare() {
+    try {
+      const invite = await buildInviteMessage();
+      window.location.href = `sms:?&body=${encodeURIComponent(invite.text)}`;
+    } catch {
+      alert("招待リンクを作成できませんでした。Supabase SQLが実行済みか確認してください。");
+    }
   }
 
   if (variant === "card") {
@@ -70,23 +116,32 @@ export function ShareInviteButton({ memberCode, handleName, variant = "compact" 
           <div>
             <p className="text-sm font-black text-pink-700">Invite</p>
             <h3 className="mt-1 text-xl font-black">友達を招待</h3>
-            <p className="mt-2 text-sm leading-6 text-stone-600">友達の「今どんなノリ？」がわかるアプリです。URLとあなたの会員コードを一緒に共有します。</p>
+            <p className="mt-2 text-sm leading-6 text-stone-600">
+              友達の「今どんなノリ？」がわかるアプリです。24時間有効の招待リンクを共有します。招待リンクから登録すると、自動で友達になります。
+            </p>
+            {lastExpiresAt ? <p className="mt-2 text-xs font-bold text-stone-500">最新リンクの期限: {formatExpiresAt(lastExpiresAt)}</p> : null}
           </div>
-          <div className="rounded-2xl bg-stone-950 px-4 py-3 text-white"><p className="text-[10px] font-black uppercase tracking-[0.22em] text-stone-400">Code</p><p className="font-mono text-lg font-black tracking-widest">{memberCode}</p></div>
+          <div className="rounded-2xl bg-stone-950 px-4 py-3 text-white">
+            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-stone-400">Code</p>
+            <p className="font-mono text-lg font-black tracking-widest">{memberCode}</p>
+          </div>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <button type="button" onClick={nativeShare} className="rounded-2xl bg-gradient-to-r from-orange-500 via-pink-500 to-violet-600 px-4 py-3 text-sm font-black text-white shadow-lg shadow-pink-100">共有</button>
-          <button type="button" onClick={openLineShare} className="rounded-2xl bg-[#06C755] px-4 py-3 text-center text-sm font-black text-white shadow-sm">LINE</button>
-          <button type="button" onClick={openSmsShare} className="rounded-2xl bg-gradient-to-r from-sky-500 to-cyan-500 px-4 py-3 text-center text-sm font-black text-white shadow-lg shadow-sky-100">SMS</button>
-          <button type="button" onClick={copyInvite} className="rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm font-black text-stone-800 shadow-sm">{copied ? "コピー済み" : "コピー"}</button>
+          <button type="button" disabled={creating} onClick={nativeShare} className="rounded-2xl bg-gradient-to-r from-orange-500 via-pink-500 to-violet-600 px-4 py-3 text-sm font-black text-white shadow-lg shadow-pink-100 disabled:opacity-55">{creating ? "作成中" : "共有"}</button>
+          <button type="button" disabled={creating} onClick={openLineShare} className="rounded-2xl bg-[#06C755] px-4 py-3 text-center text-sm font-black text-white shadow-sm disabled:opacity-55">LINE</button>
+          <button type="button" disabled={creating} onClick={openSmsShare} className="rounded-2xl bg-gradient-to-r from-sky-500 to-cyan-500 px-4 py-3 text-center text-sm font-black text-white shadow-lg shadow-sky-100 disabled:opacity-55">SMS</button>
+          <button type="button" disabled={creating} onClick={copyInvite} className="rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm font-black text-stone-800 shadow-sm disabled:opacity-55">{copied ? "コピー済み" : "コピー"}</button>
         </div>
-        <p className="mt-3 text-xs leading-5 text-stone-500">InstagramはWebから本文を直接入れにくいため、共有ボタンまたはコピー後にDM/ストーリーへ貼り付けてください。</p>
+        <p className="mt-3 text-xs leading-5 text-stone-500">Instagramは共有ボタンまたはコピー後にDM/ストーリーへ貼り付けてください。</p>
       </div>
     );
   }
 
   return (
-    <button type="button" onClick={nativeShare} className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-3 py-2 text-sm font-black text-stone-800 shadow-sm hover:bg-white" aria-label="招待を共有"><span>↗</span><span>共有</span></button>
+    <button type="button" disabled={creating} onClick={nativeShare} className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-3 py-2 text-sm font-black text-stone-800 shadow-sm hover:bg-white disabled:opacity-55" aria-label="招待を共有">
+      <span>↗</span>
+      <span>{creating ? "作成中" : "共有"}</span>
+    </button>
   );
 }

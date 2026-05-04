@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { hasContactLikeText, normalizeMemberCode } from "@/lib/safety";
+import { hasContactLikeText } from "@/lib/safety";
 
 const schema = z.object({
   handleName: z.string().trim().min(1, "ハンドルネームを入力してください").max(30, "ハンドルネームは30文字以内です"),
@@ -12,13 +12,16 @@ const schema = z.object({
   isAdult: z.boolean().default(false)
 });
 
-async function registerReferral(supabase: Awaited<ReturnType<typeof createClient>>, inviteCodeRaw: string) {
-  const inviteCode = normalizeMemberCode(inviteCodeRaw);
-  if (inviteCode.length !== 10) return;
-
-  await supabase.rpc("record_referral_by_code", { target_code: inviteCode });
+function normalizeToken(value: string) {
+  return value.replace(/[^0-9a-f]/gi, "").toLowerCase().slice(0, 32);
 }
 
+async function acceptInviteIfValid(supabase: Awaited<ReturnType<typeof createClient>>, inviteTokenRaw: string) {
+  const inviteToken = normalizeToken(inviteTokenRaw);
+  if (inviteToken.length !== 32) return;
+
+  await supabase.rpc("accept_invite_link", { invite_token: inviteToken });
+}
 
 export async function createProfile(formData: FormData) {
   const supabase = await createClient();
@@ -60,11 +63,11 @@ export async function createProfile(formData: FormData) {
     redirect(`/onboarding?message=${encodeURIComponent("プロフィール作成に失敗しました。Supabase SQLが未実行の可能性があります。")}`);
   }
 
-  await supabase.from("terms_consents").insert({ user_id: user.id, terms_version: "2026-05-04" });
+  await supabase.from("terms_consents").insert({ user_id: user.id, terms_version: "2026-05-05" });
 
-  const inviteFromForm = String(formData.get("inviteCode") ?? "");
-  const inviteFromMetadata = typeof user.user_metadata?.invite_code === "string" ? user.user_metadata.invite_code : "";
-  await registerReferral(supabase, inviteFromForm || inviteFromMetadata);
+  const inviteFromForm = String(formData.get("inviteToken") ?? "");
+  const inviteFromMetadata = typeof user.user_metadata?.invite_token === "string" ? user.user_metadata.invite_token : "";
+  await acceptInviteIfValid(supabase, inviteFromForm || inviteFromMetadata);
 
   redirect("/mood");
 }

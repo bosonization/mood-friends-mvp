@@ -2,16 +2,14 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { normalizeMemberCode } from "@/lib/safety";
 
 function getSafeNext(formData: FormData) {
   const next = String(formData.get("next") ?? "/mood");
   return next.startsWith("/") && !next.startsWith("//") ? next : "/mood";
 }
 
-function getInviteCode(formData: FormData) {
-  const invite = normalizeMemberCode(String(formData.get("inviteCode") ?? ""));
-  return invite.length === 10 ? invite : "";
+function getInviteToken(formData: FormData) {
+  return String(formData.get("inviteToken") ?? "").replace(/[^0-9a-f]/gi, "").toLowerCase().slice(0, 32);
 }
 
 export async function signIn(formData: FormData) {
@@ -33,29 +31,30 @@ export async function signUp(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const passwordConfirm = String(formData.get("passwordConfirm") ?? "");
-  const inviteCode = getInviteCode(formData);
+  const inviteToken = getInviteToken(formData);
+  const inviteQuery = inviteToken.length === 32 ? `invite=${inviteToken}&` : "";
 
   if (password.length < 6) {
-    redirect(`/login?invite=${inviteCode}&message=${encodeURIComponent("パスワードは6文字以上で入力してください。")}`);
+    redirect(`/login?${inviteQuery}message=${encodeURIComponent("パスワードは6文字以上で入力してください。")}`);
   }
 
   if (password !== passwordConfirm) {
-    redirect(`/login?invite=${inviteCode}&message=${encodeURIComponent("パスワードと確認用パスワードが一致しません。")}`);
+    redirect(`/login?${inviteQuery}message=${encodeURIComponent("パスワードと確認用パスワードが一致しません。")}`);
   }
 
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: inviteCode ? { invite_code: inviteCode } : undefined
+      data: inviteToken.length === 32 ? { invite_token: inviteToken } : undefined
     }
   });
 
   if (error) {
-    redirect(`/login?invite=${inviteCode}&message=${encodeURIComponent("会員登録に失敗しました。別のメールアドレスを試してください。")}`);
+    redirect(`/login?${inviteQuery}message=${encodeURIComponent("会員登録に失敗しました。別のメールアドレスを試してください。")}`);
   }
 
-  redirect(inviteCode ? `/onboarding?invite=${inviteCode}` : "/onboarding");
+  redirect(inviteToken.length === 32 ? `/onboarding?invite=${inviteToken}` : "/onboarding");
 }
 
 export async function signOut() {
