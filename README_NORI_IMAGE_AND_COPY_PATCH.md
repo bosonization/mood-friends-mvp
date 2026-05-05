@@ -1,4 +1,4 @@
-# eMoodition Nori image + copy patch
+# NoriDrop Nori image + copy patch
 
 ## Changes
 

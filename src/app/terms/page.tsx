@@ -7,15 +7,15 @@ export default function TermsPage() {
       <TransitionLink href="/" className="mb-6 inline-flex rounded-full border border-white/70 bg-white/70 px-4 py-2 text-sm font-bold backdrop-blur">
         ← トップへ
       </TransitionLink>
-      <article className="rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-xl shadow-orange-100 backdrop-blur-xl">
-        <p className="text-sm font-bold text-pink-700">Terms</p>
-        <h1 className="mt-2 text-3xl font-black">eMoodition 利用規約</h1>
+      <article className="rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-xl shadow-emerald-100 backdrop-blur-xl">
+        <p className="text-sm font-bold text-emerald-800">Terms</p>
+        <h1 className="mt-2 text-3xl font-black">NoriDrop 利用規約</h1>
         <p className="mt-3 text-sm text-stone-500">最終更新日：2026年5月3日</p>
 
         <section className="mt-8 space-y-6 text-sm leading-8 text-stone-700">
           <div>
             <h2 className="text-lg font-black text-stone-900">第1条（適用）</h2>
-            <p>本利用規約は、eMoodition運営者（以下「運営者」といいます。）が提供する「eMoodition」（以下「本サービス」といいます。）の利用条件を定めるものです。利用者は、本規約に同意したうえで本サービスを利用するものとします。</p>
+            <p>本利用規約は、NoriDrop運営者（以下「運営者」といいます。）が提供する「NoriDrop」（以下「本サービス」といいます。）の利用条件を定めるものです。利用者は、本規約に同意したうえで本サービスを利用するものとします。</p>
           </div>
 
           <div>

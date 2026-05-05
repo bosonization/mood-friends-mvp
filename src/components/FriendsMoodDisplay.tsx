@@ -264,7 +264,7 @@ export function FriendsMoodDisplay({ items, initialViewMode, inviteCode, ownerNa
     return (
       <section className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
         <div className="flex items-end justify-between gap-4">
-          <div><p className="text-sm font-bold text-pink-700">Friends</p><h2 className="text-2xl font-black">友達の今</h2></div>
+          <div><p className="text-sm font-bold text-emerald-800">Friends</p><h2 className="text-2xl font-black">友達の今</h2></div>
           <p className="text-sm text-stone-500">0人</p>
         </div>
         <FriendlessStarter inviteCode={inviteCode} ownerName={ownerName} />
@@ -275,7 +275,7 @@ export function FriendsMoodDisplay({ items, initialViewMode, inviteCode, ownerNa
   return (
     <section className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <div><p className="text-sm font-bold text-pink-700">Friends</p><h2 className="text-2xl font-black">友達の今</h2></div>
+        <div><p className="text-sm font-bold text-emerald-800">Friends</p><h2 className="text-2xl font-black">友達の今</h2></div>
         <div className="text-right"><p className="text-sm text-stone-500">{items.length}人</p><TransitionLink href="/settings" className="text-xs font-bold text-stone-500 underline decoration-dotted underline-offset-4 hover:text-stone-900">表示形式を変更</TransitionLink></div>
       </div>
       {initialViewMode === "list" ? <PulseList items={sortedItems} /> : <MoodOrbit items={sortedItems} />}
@@ -326,7 +326,7 @@ function MoodOrbit({ items }: { items: FriendMoodViewItem[] }) {
                     <BubbleAvatar item={item} className={avatarClass} />
                     <span className={`${node.size < 82 ? "h-6 w-6 text-xs" : "h-7 w-7 text-sm"} absolute -right-2 -top-2 grid place-items-center rounded-full border border-white bg-white shadow-md`}>{item.moodIcon ?? "◌"}</span>
                     {item.spotlightActive ? <span className="absolute -left-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-gradient-to-r from-fuchsia-500 to-violet-600 text-xs text-white shadow-md">✨</span> : null}
-                    {(item.likeCount ?? 0) > 0 ? <span className="absolute -bottom-2 -left-2 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-1.5 text-[10px] font-black text-white shadow-lg shadow-pink-100">♥{item.likeCount}</span> : null}
+                    {(item.likeCount ?? 0) > 0 ? <span className="absolute -bottom-2 -left-2 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-1.5 text-[10px] font-black text-white shadow-lg shadow-emerald-100">♥{item.likeCount}</span> : null}
                   </span>
                   <span className={`mt-2 max-w-[92%] truncate font-black text-stone-900 ${text.name}`}>{item.handleName}</span>
                   <span className={`mt-1 rounded-full px-2 py-0.5 font-black ${getBadgeClasses(item)} ${text.time}`}>{item.freshness === "normal" || compactMode ? compactTime(item.relativeTime) : item.relativeTime}</span>
@@ -438,8 +438,8 @@ function MoodLikeButton({ item }: { item: FriendMoodViewItem }) {
         onClick={submitLike}
         className={`group relative w-full overflow-hidden rounded-[1.35rem] px-4 py-3.5 text-sm font-black shadow-sm transition duration-300 hover:scale-[1.01] disabled:cursor-wait disabled:opacity-75 ${
           liked
-            ? "bg-gradient-to-r from-pink-500 via-rose-500 to-orange-400 text-white shadow-lg shadow-pink-100"
-            : "border border-pink-100 bg-gradient-to-r from-white to-pink-50/70 text-stone-900 hover:border-pink-200 hover:shadow-md hover:shadow-pink-100"
+            ? "bg-gradient-to-r from-pink-500 via-rose-500 to-orange-400 text-white shadow-lg shadow-emerald-100"
+            : "border border-pink-100 bg-gradient-to-r from-white to-pink-50/70 text-stone-900 hover:border-pink-200 hover:shadow-md hover:shadow-emerald-100"
         }`}
       >
         <span className="absolute inset-y-0 left-0 w-1/3 bg-white/20 opacity-0 blur-xl transition duration-700 group-hover:translate-x-[260%] group-hover:opacity-100" />
@@ -460,11 +460,11 @@ function MoodLikeButton({ item }: { item: FriendMoodViewItem }) {
           </span>
         ) : null}
         <span className="relative flex items-center justify-center gap-2">
-          <span className={`grid h-8 w-8 place-items-center rounded-full transition ${liked ? "animate-[noriHeartPop_0.55s_cubic-bezier(.2,1.4,.4,1)_both] bg-white/20 text-white" : "bg-pink-100 text-pink-600 group-hover:scale-110"}`}>
+          <span className={`grid h-8 w-8 place-items-center rounded-full transition ${liked ? "animate-[noriHeartPop_0.55s_cubic-bezier(.2,1.4,.4,1)_both] bg-white/20 text-white" : "bg-pink-100 text-emerald-800 group-hover:scale-110"}`}>
             {liked ? "♥" : "♡"}
           </span>
           <span>{liked ? "Nori Like済み" : "Nori Like"}</span>
-          {likeCount > 0 ? <span className={`rounded-full px-2 py-1 text-[11px] ${liked ? "bg-white/20 text-white" : "bg-white text-pink-600"}`}>{likeCount}</span> : null}
+          {likeCount > 0 ? <span className={`rounded-full px-2 py-1 text-[11px] ${liked ? "bg-white/20 text-white" : "bg-white text-emerald-800"}`}>{likeCount}</span> : null}
         </span>
       </button>
     </div>

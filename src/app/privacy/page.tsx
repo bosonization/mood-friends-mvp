@@ -7,9 +7,9 @@ export default function PrivacyPage() {
       <TransitionLink href="/" className="mb-6 inline-flex rounded-full border border-white/70 bg-white/70 px-4 py-2 text-sm font-bold backdrop-blur">
         ← トップへ
       </TransitionLink>
-      <article className="rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-xl shadow-orange-100 backdrop-blur-xl">
-        <p className="text-sm font-bold text-pink-700">Privacy</p>
-        <h1 className="mt-2 text-3xl font-black">eMoodition プライバシーポリシー</h1>
+      <article className="rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-xl shadow-emerald-100 backdrop-blur-xl">
+        <p className="text-sm font-bold text-emerald-800">Privacy</p>
+        <h1 className="mt-2 text-3xl font-black">NoriDrop プライバシーポリシー</h1>
         <p className="mt-3 text-sm text-stone-500">最終更新日：2026年5月3日</p>
 
         <section className="mt-8 space-y-6 text-sm leading-8 text-stone-700">

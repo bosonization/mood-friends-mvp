@@ -1,4 +1,4 @@
--- eMoodition MVP schema
+-- NoriDrop MVP schema
 -- For a fresh Supabase project, run this entire file.
 
 create extension if not exists pgcrypto;

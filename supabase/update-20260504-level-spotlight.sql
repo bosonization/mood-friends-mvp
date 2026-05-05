@@ -1,4 +1,4 @@
--- eMoodition Level + Referral + Spotlight migration
+-- NoriDrop Level + Referral + Spotlight migration
 -- Run once in Supabase SQL Editor before applying the Level/Spotlight app patch.
 
 alter table public.profiles

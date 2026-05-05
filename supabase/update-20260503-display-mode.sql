@@ -1,4 +1,4 @@
--- eMoodition display mode setting.
+-- NoriDrop display mode setting.
 -- Run once in Supabase SQL Editor before using the Settings display mode form.
 
 alter table public.profiles

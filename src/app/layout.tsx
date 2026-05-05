@@ -3,8 +3,8 @@ import { LoadingOverlay } from "@/components/LoadingOverlay";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "eMoodition",
-  description: "友達だけに10分セッションの気分を共有するアプリ",
+  title: "NoriDrop",
+  description: "友達の『今どんなノリ？』がわかるアプリ",
   icons: {
     icon: "/app-icon.png",
     apple: "/app-icon.png"

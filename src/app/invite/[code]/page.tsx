@@ -41,14 +41,14 @@ export default async function InvitePage({ params }: InvitePageProps) {
   return (
     <main className="mx-auto flex min-h-screen max-w-4xl flex-col px-6 py-10">
       <section className="grid flex-1 items-center">
-        <div className="rounded-[2.2rem] border border-white/70 bg-white/85 p-6 shadow-2xl shadow-orange-100 backdrop-blur-xl">
-          <p className="text-sm font-black text-pink-700">Invitation</p>
-          <h1 className="mt-2 text-4xl font-black leading-tight tracking-tight sm:text-5xl">eMooditionに招待されています</h1>
+        <div className="rounded-[2.2rem] border border-white/70 bg-white/85 p-6 shadow-2xl shadow-emerald-100 backdrop-blur-xl">
+          <p className="text-sm font-black text-emerald-800">Invitation</p>
+          <h1 className="mt-2 text-4xl font-black leading-tight tracking-tight sm:text-5xl">NoriDropに招待されています</h1>
 
           {valid ? (
             <>
               <p className="mt-4 max-w-2xl leading-8 text-stone-700">
-                eMooditionは、友達の「今どんなノリ？」がわかるアプリです。チャットやDMはなく、話しかけるきっかけだけをつくります。
+                NoriDropは、友達の「今どんなノリ？」がわかるアプリです。チャットやDMはなく、話しかけるきっかけだけをつくります。
                 この招待リンクから登録すると、{preview.inviter_handle_name ?? "招待した友達"}さんと自動で友達になります。
               </p>
               <div className="mt-6 rounded-[1.7rem] bg-stone-950 p-5 text-white">
@@ -61,9 +61,9 @@ export default async function InvitePage({ params }: InvitePageProps) {
               </div>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 {user ? (
-                  <TransitionLink href={`/onboarding?invite=${token}`} className="rounded-2xl bg-gradient-to-r from-orange-500 via-pink-500 to-violet-600 px-5 py-4 text-center font-black text-white shadow-lg shadow-pink-100">プロフィール作成へ</TransitionLink>
+                  <TransitionLink href={`/onboarding?invite=${token}`} className="rounded-2xl bg-gradient-to-r from-[#063f2e] via-[#0b6b47] to-[#12915f] px-5 py-4 text-center font-black text-white shadow-lg shadow-emerald-100">プロフィール作成へ</TransitionLink>
                 ) : (
-                  <TransitionLink href={`/login?invite=${token}`} className="rounded-2xl bg-gradient-to-r from-orange-500 via-pink-500 to-violet-600 px-5 py-4 text-center font-black text-white shadow-lg shadow-pink-100">登録・ログインする</TransitionLink>
+                  <TransitionLink href={`/login?invite=${token}`} className="rounded-2xl bg-gradient-to-r from-[#063f2e] via-[#0b6b47] to-[#12915f] px-5 py-4 text-center font-black text-white shadow-lg shadow-emerald-100">登録・ログインする</TransitionLink>
                 )}
                 <TransitionLink href="/" className="rounded-2xl border border-stone-200 bg-white px-5 py-4 text-center font-black text-stone-800 shadow-sm">トップを見る</TransitionLink>
               </div>
@@ -75,12 +75,12 @@ export default async function InvitePage({ params }: InvitePageProps) {
                 {expired ? "この招待リンクは24時間の有効期限を過ぎています。" : "この招待リンクは無効です。"}
                 通常の登録はそのまま利用できます。
               </p>
-              <div className="mt-6 rounded-[1.7rem] border border-orange-100 bg-orange-50/80 p-5">
-                <p className="font-black text-orange-900">通常登録に進む</p>
+              <div className="mt-6 rounded-[1.7rem] border border-emerald-100 bg-emerald-50/80 p-5">
+                <p className="font-black text-emerald-900">通常登録に進む</p>
                 <p className="mt-2 text-sm leading-6 text-stone-600">期限切れの場合、自動友達登録と招待実績の記録は行われません。</p>
               </div>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <TransitionLink href="/login" className="rounded-2xl bg-gradient-to-r from-orange-500 via-pink-500 to-violet-600 px-5 py-4 text-center font-black text-white shadow-lg shadow-pink-100">登録・ログインする</TransitionLink>
+                <TransitionLink href="/login" className="rounded-2xl bg-gradient-to-r from-[#063f2e] via-[#0b6b47] to-[#12915f] px-5 py-4 text-center font-black text-white shadow-lg shadow-emerald-100">登録・ログインする</TransitionLink>
                 <TransitionLink href="/" className="rounded-2xl border border-stone-200 bg-white px-5 py-4 text-center font-black text-stone-800 shadow-sm">トップを見る</TransitionLink>
               </div>
             </>

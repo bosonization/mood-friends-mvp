@@ -46,7 +46,7 @@ export default async function FriendsPage({ searchParams }: FriendsPageProps) {
           <div className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-sm font-bold text-pink-700">Friend Code</p>
+                <p className="text-sm font-bold text-emerald-800">Friend Code</p>
                 <h1 className="text-2xl font-black">友達を追加</h1>
                 <p className="mt-2 text-sm leading-6 text-stone-600">10桁コードで知っている相手にだけ申請できます。</p>
               </div>
@@ -57,8 +57,8 @@ export default async function FriendsPage({ searchParams }: FriendsPageProps) {
               </div>
             </div>
             <form action={requestFriend} className="mt-5 space-y-3">
-              <label className="block text-sm font-bold">相手の会員コード<input className="mt-2 w-full rounded-2xl border border-stone-200 px-4 py-3 font-mono tracking-widest outline-none focus:border-pink-400" name="memberCode" inputMode="numeric" maxLength={10} placeholder="1234567890" required /></label>
-              <SubmitButton pendingText="申請中..." className="w-full rounded-2xl bg-gradient-to-r from-orange-500 via-pink-500 to-violet-600 px-5 py-3 font-black text-white shadow-lg shadow-pink-100">申請する</SubmitButton>
+              <label className="block text-sm font-bold">相手の会員コード<input className="mt-2 w-full rounded-2xl border border-stone-200 px-4 py-3 font-mono tracking-widest outline-none focus:border-emerald-500" name="memberCode" inputMode="numeric" maxLength={10} placeholder="1234567890" required /></label>
+              <SubmitButton pendingText="申請中..." className="w-full rounded-2xl bg-gradient-to-r from-[#063f2e] via-[#0b6b47] to-[#12915f] px-5 py-3 font-black text-white shadow-lg shadow-emerald-100">申請する</SubmitButton>
             </form>
             <div className="mt-5"><FormMessage message={params.message} /></div>
           </div>
@@ -105,7 +105,7 @@ function FriendshipSection({ title, empty, children }: { title: string; empty: s
         {Array.isArray(items) && items.length > 0 ? <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[11px] font-black text-stone-500">{items.length}</span> : null}
       </div>
       <div className="mt-3 space-y-2">
-        {Array.isArray(items) && items.length === 0 ? <p className="rounded-2xl border border-dashed border-orange-200 p-4 text-sm text-stone-600">{empty}</p> : items}
+        {Array.isArray(items) && items.length === 0 ? <p className="rounded-2xl border border-dashed border-emerald-200 p-4 text-sm text-stone-600">{empty}</p> : items}
       </div>
     </div>
   );

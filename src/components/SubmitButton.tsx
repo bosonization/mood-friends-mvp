@@ -21,7 +21,7 @@ export function SubmitButton({ children, pendingText = "更新中...", className
   return (
     <button type="submit" disabled={disabled || pending} className={className}>
       <span className="inline-flex items-center justify-center gap-2">
-        {pending ? <span className="h-4 w-4 rounded-full border-2 border-white/50 border-t-white emoodition-spinner" aria-hidden="true" /> : null}
+        {pending ? <span className="h-4 w-4 rounded-full border-2 border-white/50 border-t-white noridrop-spinner" aria-hidden="true" /> : null}
         {pending ? pendingText : children}
       </span>
     </button>

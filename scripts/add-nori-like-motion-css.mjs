@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const file = path.join(process.cwd(), 'src', 'app', 'globals.css');
-const marker = '/* eMoodition Nori Like motion */';
+const marker = '/* NoriDrop Nori Like motion */';
 const block = `
 ${marker}
 @keyframes noriHeartPop {

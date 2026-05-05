@@ -26,10 +26,10 @@ export default async function MoodPage({ searchParams }: MoodPageProps) {
 
   return (
     <main className="mx-auto grid min-h-screen max-w-4xl items-center px-6 py-10">
-      <section className="rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-2xl shadow-orange-100 backdrop-blur-xl">
+      <section className="rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-2xl shadow-emerald-100 backdrop-blur-xl">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-bold text-pink-700">Nori Start</p>
+            <p className="text-sm font-bold text-emerald-800">Nori Start</p>
             <h1 className="mt-2 text-4xl font-black tracking-tight">今のノリを選んでください</h1>
           </div>
           <div className="rounded-2xl bg-stone-950 px-4 py-3 text-right text-white">
@@ -38,7 +38,7 @@ export default async function MoodPage({ searchParams }: MoodPageProps) {
           </div>
         </div>
         <p className="mt-3 max-w-2xl leading-7 text-stone-700">
-          今なにしてる？ではなく、今どんな誘いなら乗れそう？を置いておこう。
+          今なにしてる？ではなく、今どんな誘いなら乗れそう？をDropしておこう。
         </p>
         {!profile.is_adult ? (
           <p className="mt-3 rounded-2xl bg-stone-100 px-4 py-3 text-sm font-bold text-stone-600">

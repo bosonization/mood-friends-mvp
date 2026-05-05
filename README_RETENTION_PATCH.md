@@ -1,4 +1,4 @@
-# eMoodition retention patch
+# NoriDrop retention patch
 
 ## 変更内容
 

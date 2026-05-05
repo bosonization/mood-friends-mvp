@@ -1,4 +1,4 @@
--- eMoodition update migration for an existing mood-friends-mvp Supabase project.
+-- NoriDrop update migration for an existing mood-friends-mvp Supabase project.
 -- Run this only if your project does not yet have mood session columns or avatars bucket.
 
 alter table public.mood_statuses

@@ -12,7 +12,7 @@ type ContactActionPanelProps = {
 function buildMessage({ handleName, moodLabel, moodIcon, relativeTime }: ContactActionPanelProps) {
   const moodText = moodLabel ? `${moodIcon ?? ""} ${moodLabel}`.trim() : "今のノリ";
   const timeText = relativeTime ? `（${relativeTime}）` : "";
-  return `eMooditionで${handleName}さんの「${moodText}」を見たよ${timeText}。今ちょっと話せる？`;
+  return `NoriDropで${handleName}さんの「${moodText}」を見たよ${timeText}。今ちょっと話せる？`;
 }
 
 export function ContactActionPanel(props: ContactActionPanelProps) {

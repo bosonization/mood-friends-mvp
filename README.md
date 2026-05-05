@@ -1,4 +1,4 @@
-# eMoodition MVP
+# NoriDrop MVP
 
 友達だけに「10分セッション単位の気分」と「その時のログイン」を共有する、チャットなしのMVPです。
 
@@ -36,4 +36,4 @@ git push
 ## Supabase SQL
 
 今回の更新でDB構造変更はありません。SQL実行は不要です。
-既存環境でStorage未設定の場合のみ、過去の `supabase/update-20260503-emoodition.sql` を実行してください。
+既存環境でStorage未設定の場合のみ、過去の `supabase/update-20260503-noridrop.sql` を実行してください。

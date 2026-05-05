@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
-export const LOADING_EVENT = "emoodition:navigation-start";
+export const LOADING_EVENT = "noridrop:navigation-start";
 
 export function startGlobalLoading() {
   if (typeof window !== "undefined") {
@@ -40,7 +40,7 @@ export function LoadingOverlay() {
   return (
     <div className="fixed inset-0 z-[9999] grid place-items-center bg-stone-950/35 backdrop-blur-sm">
       <div className="rounded-[1.75rem] border border-white/20 bg-white/90 px-6 py-5 text-center shadow-2xl">
-        <div className="mx-auto h-10 w-10 rounded-full border-4 border-stone-200 border-t-fuchsia-500 emoodition-spinner" />
+        <div className="mx-auto h-10 w-10 rounded-full border-4 border-stone-200 border-t-fuchsia-500 noridrop-spinner" />
         <p className="mt-3 text-sm font-black text-stone-800">更新中...</p>
       </div>
     </div>

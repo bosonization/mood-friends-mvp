@@ -1,4 +1,4 @@
--- eMoodition friend private memos
+-- NoriDrop friend private memos
 -- Private notes that only the owner can see/edit.
 
 create table if not exists public.friend_memos (

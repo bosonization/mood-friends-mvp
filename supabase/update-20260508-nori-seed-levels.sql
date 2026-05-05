@@ -1,4 +1,4 @@
--- eMoodition Nori Seed level redesign
+-- NoriDrop Nori Seed level redesign
 -- Run after the previous Level + Spotlight migrations.
 -- New growth rule:
 -- Lv1 initial

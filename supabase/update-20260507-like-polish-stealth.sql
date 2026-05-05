@@ -1,4 +1,4 @@
--- eMoodition like polish + stealth nori migration
+-- NoriDrop like polish + stealth nori migration
 -- Adds a once-per-day stealth entry that lets a user enter home without updating mood/login.
 
 create table if not exists public.nori_stealth_uses (

@@ -33,7 +33,7 @@ export function ShareInviteButton({ memberCode, handleName, variant = "compact" 
 
   const shareText = useMemo(() => {
     const from = handleName ? `${handleName}さんから` : "";
-    return `${from}eMooditionに招待しています。\n友達の「今どんなノリ？」がわかるアプリです。\nこの招待リンクは24時間有効です。\n会員コード: ${memberCode}`;
+    return `${from}NoriDropに招待しています。\n友達の「今どんなノリ？」がわかるアプリです。\nこの招待リンクは24時間有効です。\n会員コード: ${memberCode}`;
   }, [handleName, memberCode]);
 
   async function createInvite() {
@@ -80,7 +80,7 @@ export function ShareInviteButton({ memberCode, handleName, variant = "compact" 
     try {
       const invite = await buildInviteMessage();
       if (navigator.share) {
-        await navigator.share({ title: "eMooditionに招待", text: shareText, url: invite.url });
+        await navigator.share({ title: "NoriDropに招待", text: shareText, url: invite.url });
         return;
       }
       await navigator.clipboard.writeText(invite.text);
@@ -114,10 +114,10 @@ export function ShareInviteButton({ memberCode, handleName, variant = "compact" 
       <div className="rounded-[1.7rem] border border-white/70 bg-white/75 p-4 shadow-sm backdrop-blur-xl">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-sm font-black text-pink-700">Invite</p>
+            <p className="text-sm font-black text-emerald-800">Invite</p>
             <h3 className="mt-1 text-xl font-black">友達を招待</h3>
             <p className="mt-2 text-sm leading-6 text-stone-600">
-              友達の「今どんなノリ？」がわかるアプリです。24時間有効の招待リンクを共有します。招待リンクから登録すると、自動で友達になります。
+              NoriDropは友達の「今どんなノリ？」がわかるアプリです。24時間有効の招待リンクを共有します。招待リンクから登録すると、自動で友達になります。
             </p>
             {lastExpiresAt ? <p className="mt-2 text-xs font-bold text-stone-500">最新リンクの期限: {formatExpiresAt(lastExpiresAt)}</p> : null}
           </div>
@@ -128,7 +128,7 @@ export function ShareInviteButton({ memberCode, handleName, variant = "compact" 
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <button type="button" disabled={creating} onClick={nativeShare} className="rounded-2xl bg-gradient-to-r from-orange-500 via-pink-500 to-violet-600 px-4 py-3 text-sm font-black text-white shadow-lg shadow-pink-100 disabled:opacity-55">{creating ? "作成中" : "共有"}</button>
+          <button type="button" disabled={creating} onClick={nativeShare} className="rounded-2xl bg-gradient-to-r from-[#063f2e] via-[#0b6b47] to-[#12915f] px-4 py-3 text-sm font-black text-white shadow-lg shadow-emerald-100 disabled:opacity-55">{creating ? "作成中" : "共有"}</button>
           <button type="button" disabled={creating} onClick={openLineShare} className="rounded-2xl bg-[#06C755] px-4 py-3 text-center text-sm font-black text-white shadow-sm disabled:opacity-55">LINE</button>
           <button type="button" disabled={creating} onClick={openSmsShare} className="rounded-2xl bg-gradient-to-r from-sky-500 to-cyan-500 px-4 py-3 text-center text-sm font-black text-white shadow-lg shadow-sky-100 disabled:opacity-55">SMS</button>
           <button type="button" disabled={creating} onClick={copyInvite} className="rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm font-black text-stone-800 shadow-sm disabled:opacity-55">{copied ? "コピー済み" : "コピー"}</button>

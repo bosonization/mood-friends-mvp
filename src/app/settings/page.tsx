@@ -25,7 +25,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
     <AppShell>
       <section className="mx-auto max-w-2xl space-y-5">
         <div className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
-          <p className="text-sm font-bold text-pink-700">Settings</p>
+          <p className="text-sm font-bold text-emerald-800">Settings</p>
           <h1 className="text-2xl font-black">設定</h1>
           <p className="mt-2 text-sm leading-6 text-stone-600">表示形式や規約、退会設定を管理できます。会員コードと招待は「友達」画面にまとめました。</p>
           <div className="mt-5"><FormMessage message={params.message} /></div>
@@ -36,21 +36,21 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
           <p className="mt-2 text-sm leading-6 text-stone-600">トップ画面の「友達の今」を、Mood OrbitかListで表示できます。</p>
           <form action={updateDisplayMode} className="mt-5 space-y-3">
             {VIEW_MODES.map((mode) => (
-              <label key={mode.key} className={`flex cursor-pointer items-start gap-3 rounded-[1.3rem] border p-4 transition ${currentViewMode === mode.key ? "border-fuchsia-200 bg-fuchsia-50/80 ring-4 ring-fuchsia-100" : "border-stone-100 bg-white hover:bg-orange-50"}`}>
+              <label key={mode.key} className={`flex cursor-pointer items-start gap-3 rounded-[1.3rem] border p-4 transition ${currentViewMode === mode.key ? "border-fuchsia-200 bg-fuchsia-50/80 ring-4 ring-fuchsia-100" : "border-stone-100 bg-white hover:bg-emerald-50"}`}>
                 <input type="radio" name="displayMode" value={mode.key} defaultChecked={currentViewMode === mode.key} className="mt-1" />
                 <span><span className="block font-black">{mode.label}</span><span className="mt-1 block text-sm text-stone-500">{mode.description}</span></span>
               </label>
             ))}
-            <SubmitButton pendingText="保存中..." className="w-full rounded-2xl bg-gradient-to-r from-orange-500 via-pink-500 to-violet-600 px-5 py-3 font-black text-white shadow-lg shadow-pink-100">表示形式を保存</SubmitButton>
+            <SubmitButton pendingText="保存中..." className="w-full rounded-2xl bg-gradient-to-r from-[#063f2e] via-[#0b6b47] to-[#12915f] px-5 py-3 font-black text-white shadow-lg shadow-emerald-100">表示形式を保存</SubmitButton>
           </form>
         </div>
 
         <div className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
           <h2 className="text-xl font-black">規約・ポリシー</h2>
           <div className="mt-4 grid gap-3 text-sm font-bold text-stone-700">
-            <TransitionLink href="/terms" className="rounded-2xl border border-stone-100 bg-white px-4 py-3 hover:bg-orange-50">利用規約</TransitionLink>
-            <TransitionLink href="/privacy" className="rounded-2xl border border-stone-100 bg-white px-4 py-3 hover:bg-orange-50">プライバシーポリシー</TransitionLink>
-            <TransitionLink href="/disclosures" className="rounded-2xl border border-stone-100 bg-white px-4 py-3 hover:bg-orange-50">広告・アフィリエイト表記</TransitionLink>
+            <TransitionLink href="/terms" className="rounded-2xl border border-stone-100 bg-white px-4 py-3 hover:bg-emerald-50">利用規約</TransitionLink>
+            <TransitionLink href="/privacy" className="rounded-2xl border border-stone-100 bg-white px-4 py-3 hover:bg-emerald-50">プライバシーポリシー</TransitionLink>
+            <TransitionLink href="/disclosures" className="rounded-2xl border border-stone-100 bg-white px-4 py-3 hover:bg-emerald-50">広告・アフィリエイト表記</TransitionLink>
           </div>
         </div>
 

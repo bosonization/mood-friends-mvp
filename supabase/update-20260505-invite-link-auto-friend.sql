@@ -1,4 +1,4 @@
--- eMoodition 24h invite link + automatic friend registration
+-- NoriDrop 24h invite link + automatic friend registration
 -- Run once in Supabase SQL Editor.
 -- This keeps invite links valid for 24 hours and auto-accepts friendship when a new user registers through a valid invite link.
 

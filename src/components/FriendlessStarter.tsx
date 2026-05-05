@@ -17,7 +17,7 @@ export function FriendlessStarter({ inviteCode, ownerName }: { inviteCode?: stri
         {demoBubbles.map((bubble) => <div key={bubble.name} className={`absolute grid -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border text-center backdrop-blur-xl ${bubble.className}`}><div><p className="text-2xl">{bubble.icon}</p><p className="mt-1 truncate px-2 text-[10px] font-black text-stone-900">{bubble.name}</p><p className="text-[9px] font-black text-stone-500">{bubble.time}</p></div></div>)}
       </div>
       <div className="space-y-3">
-        <div className="rounded-[1.7rem] border border-orange-100 bg-orange-50/75 p-4"><p className="text-sm font-black text-orange-800">まだ友達がいません</p><h3 className="mt-1 text-xl font-black">まず1人に共有しよう</h3><p className="mt-2 text-sm leading-6 text-stone-600">友達が増えると、使える気分と見え方が広がります。Lv5でSpotlightが解放されます。</p></div>
+        <div className="rounded-[1.7rem] border border-emerald-100 bg-emerald-50/75 p-4"><p className="text-sm font-black text-emerald-900">まだ友達がいません</p><h3 className="mt-1 text-xl font-black">まず1人に共有しよう</h3><p className="mt-2 text-sm leading-6 text-stone-600">友達が増えると、使える気分と見え方が広がります。Lv5でSpotlightが解放されます。</p></div>
         {inviteCode ? <ShareInviteButton memberCode={inviteCode} handleName={ownerName} variant="card" /> : <TransitionLink href="/friends" className="block rounded-[1.7rem] bg-stone-950 px-5 py-4 text-center font-black text-white">友達ページへ</TransitionLink>}
       </div>
     </div>

@@ -62,14 +62,14 @@ export function AvatarUploader({ name, currentUrl, handleName }: AvatarUploaderP
   }
 
   return (
-    <div className="rounded-3xl border border-orange-100 bg-white/70 p-4">
+    <div className="rounded-3xl border border-emerald-100 bg-white/70 p-4">
       <input type="hidden" name={name} value={url} />
       <div className="flex items-center gap-4">
         <Avatar src={url} name={handleName || "user"} size="lg" />
         <div className="flex-1">
           <label className="inline-flex cursor-pointer rounded-2xl bg-stone-950 px-4 py-3 text-sm font-bold text-white hover:bg-stone-800">
             <span className="inline-flex items-center gap-2">
-              {uploading ? <span className="h-4 w-4 rounded-full border-2 border-white/50 border-t-white emoodition-spinner" /> : null}
+              {uploading ? <span className="h-4 w-4 rounded-full border-2 border-white/50 border-t-white noridrop-spinner" /> : null}
               {uploading ? "アップロード中..." : "画像をアップロード"}
             </span>
             <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden" onChange={handleChange} disabled={uploading} />

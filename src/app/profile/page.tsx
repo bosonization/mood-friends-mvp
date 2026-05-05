@@ -20,15 +20,15 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   return (
     <AppShell>
       <section className="mx-auto max-w-2xl rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
-        <p className="text-sm font-bold text-pink-700">Profile</p><h1 className="text-2xl font-black">プロフィール編集</h1>
+        <p className="text-sm font-bold text-emerald-800">Profile</p><h1 className="text-2xl font-black">プロフィール編集</h1>
         <p className="mt-2 text-sm leading-6 text-stone-600">画像、名前、一言、年齢区分を編集できます。</p>
         <div className="mt-5"><FormMessage message={params.message} /></div>
         <form action={updateProfile} className="mt-6 space-y-5">
           <AvatarUploader name="avatarUrl" currentUrl={profile.avatar_url} handleName={profile.handle_name} />
-          <label className="block text-sm font-bold">ハンドルネーム<input className="mt-2 w-full rounded-2xl border border-stone-200 px-4 py-3 outline-none focus:border-pink-400" name="handleName" maxLength={30} required defaultValue={profile.handle_name} /></label>
-          <label className="block text-sm font-bold">一言（15文字以下）<input className="mt-2 w-full rounded-2xl border border-stone-200 px-4 py-3 outline-none focus:border-pink-400" name="tagline" maxLength={15} defaultValue={profile.tagline} /></label>
+          <label className="block text-sm font-bold">ハンドルネーム<input className="mt-2 w-full rounded-2xl border border-stone-200 px-4 py-3 outline-none focus:border-emerald-500" name="handleName" maxLength={30} required defaultValue={profile.handle_name} /></label>
+          <label className="block text-sm font-bold">一言（15文字以下）<input className="mt-2 w-full rounded-2xl border border-stone-200 px-4 py-3 outline-none focus:border-emerald-500" name="tagline" maxLength={15} defaultValue={profile.tagline} /></label>
 
-          <div className="rounded-2xl border border-orange-100 bg-orange-50/70 p-4 text-sm">
+          <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm">
             <p className="font-bold">年齢区分</p>
             <p className="mt-1 text-xs leading-5 text-stone-500">20歳未満の場合、「飲み」は選べません。</p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
@@ -37,7 +37,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             </div>
           </div>
 
-          <SubmitButton pendingText="更新中..." className="w-full rounded-2xl bg-gradient-to-r from-orange-500 via-pink-500 to-violet-600 px-5 py-3 font-black text-white shadow-lg shadow-pink-100">更新する</SubmitButton>
+          <SubmitButton pendingText="更新中..." className="w-full rounded-2xl bg-gradient-to-r from-[#063f2e] via-[#0b6b47] to-[#12915f] px-5 py-3 font-black text-white shadow-lg shadow-emerald-100">更新する</SubmitButton>
         </form>
       </section>
     </AppShell>

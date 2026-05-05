@@ -1,4 +1,4 @@
--- eMoodition Nori Like migration
+-- NoriDrop Nori Like migration
 -- Adds mood history entries and one-way like reactions.
 -- Run once in Supabase SQL Editor before applying the app patch.
 

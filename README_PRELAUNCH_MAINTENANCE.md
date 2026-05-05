@@ -1,4 +1,4 @@
-# eMoodition pre-launch maintenance
+# NoriDrop pre-launch maintenance
 
 This patch adds:
 

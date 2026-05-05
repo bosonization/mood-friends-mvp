@@ -61,7 +61,7 @@ export function MoodSelectionForm({ previousMoodKey, level, isAdult }: MoodSelec
                 isSelected
                   ? "border-fuchsia-300 bg-gradient-to-br from-white to-fuchsia-50 ring-4 ring-fuchsia-100"
                   : unlocked
-                    ? "border-orange-100 bg-white hover:border-pink-200"
+                    ? "border-emerald-100 bg-white hover:border-pink-200"
                     : "border-stone-100 bg-stone-50/80 opacity-55"
               }`}
               aria-pressed={isSelected}
@@ -99,7 +99,7 @@ function MoodSubmitArea({ selectedLabel, disabled, level, stealthUnlocked }: { s
     <div className="rounded-[1.7rem] border border-white/70 bg-white/80 p-4 shadow-sm backdrop-blur">
       <p className="text-sm font-bold text-stone-700">{selectedLabel ? `選択中: ${selectedLabel}` : "今のノリを1つ選んでください"}</p>
       <p className="mt-1 text-xs leading-5 text-stone-500">
-        今なにしてる？ではなく、今どんな誘いなら乗れそう？を置いておこう。現在Lv{level}です。
+        今なにしてる？ではなく、今どんな誘いなら乗れそう？をDropしておこう。現在Lv{level}です。
       </p>
       {stealthUnlocked ? (
         <p className="mt-3 rounded-2xl bg-stone-950 px-4 py-3 text-xs font-black text-white shadow-sm">
@@ -108,14 +108,14 @@ function MoodSubmitArea({ selectedLabel, disabled, level, stealthUnlocked }: { s
       ) : null}
       <SubmitButton
         disabled={disabled || pending}
-        pendingText={stealthUnlocked ? "入室中..." : "置いています..."}
+        pendingText={stealthUnlocked ? "入室中..." : "Drop中..."}
         className={`mt-4 w-full rounded-2xl px-5 py-3 font-black text-white shadow-lg transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 ${
           stealthUnlocked
             ? "bg-gradient-to-r from-stone-900 via-slate-800 to-zinc-900 shadow-stone-200"
             : "bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 shadow-blue-200"
         }`}
       >
-        {stealthUnlocked ? "このまま入る" : "今のノリを置く"}
+        {stealthUnlocked ? "このまま入る" : "今のノリをDrop"}
       </SubmitButton>
     </div>
   );
