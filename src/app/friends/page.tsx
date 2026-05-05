@@ -5,9 +5,9 @@ import { CopyButton } from "@/components/CopyButton";
 import { FormMessage } from "@/components/FormMessage";
 import { ShareInviteButton } from "@/components/ShareInviteButton";
 import { SubmitButton } from "@/components/SubmitButton";
-import { acceptFriend, deleteFriend, rejectFriend, requestFriend } from "./actions";
+import { acceptFriend, deleteFriend, rejectFriend, requestFriend, saveFriendMemo } from "./actions";
 import { createClient } from "@/lib/supabase/server";
-import type { Friendship, Profile } from "@/lib/types";
+import type { FriendMemo, Friendship, Profile } from "@/lib/types";
 
 type FriendsPageProps = { searchParams: Promise<{ message?: string }> };
 
@@ -30,6 +30,10 @@ export default async function FriendsPage({ searchParams }: FriendsPageProps) {
   const relatedIds = Array.from(new Set((friendships ?? []).map((friendship) => friendship.requester_id === user.id ? friendship.addressee_id : friendship.requester_id)));
   const { data: relatedProfiles } = relatedIds.length ? await supabase.from("profiles").select("*").in("id", relatedIds).returns<Profile[]>() : { data: [] as Profile[] };
   const profileById = new Map((relatedProfiles ?? []).map((item) => [item.id, item]));
+  const { data: friendMemos } = relatedIds.length
+    ? await supabase.from("friend_memos").select("*").eq("owner_id", user.id).in("friend_id", relatedIds).returns<FriendMemo[]>()
+    : { data: [] as FriendMemo[] };
+  const memoByFriendId = new Map((friendMemos ?? []).map((memo) => [memo.friend_id, memo.note]));
 
   const accepted = (friendships ?? []).filter((item) => item.status === "accepted");
   const receivedPending = (friendships ?? []).filter((item) => item.status === "pending" && item.addressee_id === user.id);
@@ -72,7 +76,19 @@ export default async function FriendsPage({ searchParams }: FriendsPageProps) {
           </FriendshipSection>
 
           <FriendshipSection title="友達" empty="まだ友達はいません。">
-            {accepted.map((friendship) => { const otherId = friendship.requester_id === user.id ? friendship.addressee_id : friendship.requester_id; const other = profileById.get(otherId); if (!other) return null; return <FriendshipCard key={friendship.id} profile={other}><form action={deleteFriend}><input type="hidden" name="friendshipId" value={friendship.id} /><SubmitButton pendingText="削除中..." className="rounded-full border border-red-200 px-4 py-2 text-sm text-red-700">削除</SubmitButton></form></FriendshipCard>; })}
+            {accepted.map((friendship) => {
+              const otherId = friendship.requester_id === user.id ? friendship.addressee_id : friendship.requester_id;
+              const other = profileById.get(otherId);
+              if (!other) return null;
+              return (
+                <FriendshipCard key={friendship.id} profile={other} memo={memoByFriendId.get(other.id) ?? ""} editableMemo>
+                  <form action={deleteFriend}>
+                    <input type="hidden" name="friendshipId" value={friendship.id} />
+                    <SubmitButton pendingText="削除中..." className="rounded-full border border-red-200 px-4 py-2 text-sm text-red-700">削除</SubmitButton>
+                  </form>
+                </FriendshipCard>
+              );
+            })}
           </FriendshipSection>
         </section>
       </div>
@@ -85,6 +101,35 @@ function FriendshipSection({ title, empty, children }: { title: string; empty: s
   return <div className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl"><h2 className="text-xl font-black">{title}</h2><div className="mt-4 space-y-3">{Array.isArray(items) && items.length === 0 ? <p className="rounded-3xl border border-dashed border-orange-200 p-5 text-sm text-stone-600">{empty}</p> : items}</div></div>;
 }
 
-function FriendshipCard({ profile, children }: { profile: Profile; children: React.ReactNode }) {
-  return <article className="flex items-center gap-3 rounded-3xl border border-stone-100 bg-white p-4 shadow-sm"><Avatar src={profile.avatar_url} name={profile.handle_name} /><div className="min-w-0 flex-1"><p className="truncate font-bold">{profile.handle_name}</p><p className="truncate text-sm text-stone-500">{profile.tagline || "一言未設定"}</p></div>{children}</article>;
+function FriendshipCard({ profile, children, memo = "", editableMemo = false }: { profile: Profile; children: React.ReactNode; memo?: string; editableMemo?: boolean }) {
+  return (
+    <article className="rounded-3xl border border-stone-100 bg-white p-4 shadow-sm">
+      <div className="flex items-center gap-3">
+        <Avatar src={profile.avatar_url} name={profile.handle_name} />
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-bold">{profile.handle_name}</p>
+          <p className="truncate text-sm text-stone-500">{profile.tagline || "一言未設定"}</p>
+          {memo ? <p className="mt-1 inline-flex max-w-full rounded-full bg-gradient-to-r from-cyan-50 to-fuchsia-50 px-2.5 py-1 text-[11px] font-bold text-stone-600">自分メモ：<span className="truncate">{memo}</span></p> : null}
+        </div>
+        <div className="shrink-0">{children}</div>
+      </div>
+      {editableMemo ? (
+        <form action={saveFriendMemo} className="mt-3 rounded-[1.25rem] border border-stone-100 bg-stone-50/70 p-3">
+          <input type="hidden" name="friendId" value={profile.id} />
+          <label className="block text-[11px] font-black uppercase tracking-[0.18em] text-stone-400">Private memo</label>
+          <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+            <input
+              name="note"
+              defaultValue={memo}
+              maxLength={80}
+              placeholder="例：高校の友達 / 田中さん / Apex仲間"
+              className="min-w-0 flex-1 rounded-2xl border border-white bg-white px-4 py-3 text-sm font-bold outline-none transition focus:border-fuchsia-300 focus:ring-4 focus:ring-fuchsia-100"
+            />
+            <SubmitButton pendingText="保存中..." className="rounded-2xl bg-stone-950 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-stone-800">保存</SubmitButton>
+          </div>
+          <p className="mt-2 text-[11px] leading-5 text-stone-400">相手には見えません。空で保存すると削除されます。</p>
+        </form>
+      ) : null}
+    </article>
+  );
 }

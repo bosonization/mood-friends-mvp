@@ -12,7 +12,7 @@ import { formatRemainingTime, getMoodFreshness, isMoodSessionActive } from "@/li
 import { createClient } from "@/lib/supabase/server";
 import { getAndSyncLevelStatus } from "@/lib/level";
 import { normalizeViewMode } from "@/lib/viewMode";
-import type { Friendship, MoodEntry, MoodReaction, MoodSpotlight, MoodStatus, Profile } from "@/lib/types";
+import type { FriendMemo, Friendship, MoodEntry, MoodReaction, MoodSpotlight, MoodStatus, Profile } from "@/lib/types";
 
 type HomePageProps = { searchParams: Promise<{ message?: string }> };
 
@@ -56,6 +56,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const { data: friendMoods } = friendIds.length
     ? await supabase.from("mood_statuses").select("*").in("user_id", friendIds).returns<MoodStatus[]>()
     : { data: [] as MoodStatus[] };
+  const { data: friendMemos } = friendIds.length
+    ? await supabase.from("friend_memos").select("*").eq("owner_id", user.id).in("friend_id", friendIds).returns<FriendMemo[]>()
+    : { data: [] as FriendMemo[] };
+  const memoByFriendId = new Map((friendMemos ?? []).map((memo) => [memo.friend_id, memo.note]));
 
   const spotlightIds = [user.id, ...friendIds];
   const { data: activeSpotlights } = spotlightIds.length
@@ -146,7 +150,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       spotlightExpiresAt: spotlight?.expires_at ?? null,
       currentEntryId: friendMood?.current_entry_id ?? null,
       likedByMe: entryReactions.some((reaction) => reaction.actor_id === user.id),
-      likeCount: entryReactions.length
+      likeCount: entryReactions.length,
+      friendMemo: memoByFriendId.get(friend.id) ?? null
     };
   });
 

@@ -26,6 +26,7 @@ export type FriendMoodViewItem = {
   currentEntryId?: string | null;
   likedByMe?: boolean;
   likeCount?: number;
+  friendMemo?: string | null;
 };
 
 type FriendsMoodDisplayProps = {
@@ -354,6 +355,12 @@ function SelectedFriendCard({ item }: { item?: FriendMoodViewItem }) {
       <p className="text-xs font-black uppercase tracking-[0.22em] text-stone-400">Selected</p>
       <div className="mt-4">
         <div className="flex items-center gap-3"><BubbleAvatar item={item} className="h-16 w-16" /><div className="min-w-0"><p className="truncate text-lg font-black">{item.spotlightActive ? "✨ " : ""}{item.handleName}</p><p className="truncate text-sm text-stone-500">{item.tagline || "一言未設定"}</p></div></div>
+        {item.friendMemo ? (
+          <div className="mt-4 rounded-[1.3rem] border border-cyan-100 bg-gradient-to-r from-cyan-50/90 via-white/80 to-fuchsia-50/90 p-3 shadow-inner">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Private memo</p>
+            <p className="mt-1 text-sm font-black leading-6 text-stone-700">{item.friendMemo}</p>
+          </div>
+        ) : null}
         <div className="mt-5 rounded-[1.4rem] bg-stone-950 p-4 text-white">
           <div className="flex items-center gap-3"><span className="text-5xl">{item.moodIcon ?? "◌"}</span><div><p className="text-xl font-black">{item.moodLabel ?? "未登録"}</p><p className="text-sm text-stone-300">{item.moodDescription ?? "まだ気分がありません"}</p></div></div>
           <p className="mt-4 text-xs text-stone-400">{item.relativeTime}</p>
@@ -486,7 +493,7 @@ function PulseList({ items }: { items: FriendMoodViewItem[] }) {
         return (
           <article key={item.id} className={`flex items-center gap-3 rounded-3xl border p-4 shadow-sm ${accent}`}>
             <BubbleAvatar item={item} className="h-14 w-14" />
-            <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h3 className="truncate font-bold">{item.spotlightActive ? "✨ " : ""}{item.handleName}</h3>{item.tagline ? <span className="rounded-full bg-white/75 px-2 py-1 text-xs text-stone-700">{item.tagline}</span> : null}</div><p className="mt-1 text-sm font-bold text-stone-700">{item.moodIcon ? `${item.moodIcon} ${item.moodLabel}` : "まだ気分未登録"}{(item.likeCount ?? 0) > 0 ? `　♡${item.likeCount}` : ""}</p></div>
+            <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h3 className="truncate font-bold">{item.spotlightActive ? "✨ " : ""}{item.handleName}</h3>{item.tagline ? <span className="rounded-full bg-white/75 px-2 py-1 text-xs text-stone-700">{item.tagline}</span> : null}</div><p className="mt-1 text-sm font-bold text-stone-700">{item.moodIcon ? `${item.moodIcon} ${item.moodLabel}` : "まだ気分未登録"}{(item.likeCount ?? 0) > 0 ? `　♡${item.likeCount}` : ""}</p>{item.friendMemo ? <p className="mt-1 inline-flex max-w-full rounded-full bg-white/75 px-2 py-1 text-[11px] font-bold text-stone-500">メモ：<span className="truncate">{item.friendMemo}</span></p> : null}</div>
             <div className="shrink-0 text-right"><p className={`rounded-full px-3 py-1 text-xs font-black ${timeBadge}`}>{item.relativeTime}</p>{item.active && item.remainingTime ? <p className="mt-1 text-[11px] text-stone-500">残り {item.remainingTime}</p> : null}</div>
           </article>
         );

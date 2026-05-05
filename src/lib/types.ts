@@ -62,3 +62,11 @@ export type MoodSpotlight = {
   expires_at: string;
   created_at: string;
 };
+
+export type FriendMemo = {
+  owner_id: string;
+  friend_id: string;
+  note: string;
+  created_at: string;
+  updated_at: string;
+};
