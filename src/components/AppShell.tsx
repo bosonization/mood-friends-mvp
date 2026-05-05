@@ -11,7 +11,7 @@ export function AppShell({ children }: AppShellProps) {
     <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 py-5 sm:px-6">
       <header className="mb-6 flex items-center justify-between rounded-[1.75rem] border border-white/70 bg-white/78 px-4 py-3 shadow-sm backdrop-blur-xl">
         <TransitionLink href="/home" className="flex min-w-0 items-center gap-3 font-black tracking-tight" aria-label="NoriDrop ホーム">
-          <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-emerald-100">
+          <span className="block h-10 w-10 shrink-0 overflow-hidden rounded-[0.9rem]">
             <img src="/noridrop-icon.png" alt="" className="h-full w-full object-cover" />
           </span>
           <img src="/noridrop-logo.png" alt="NoriDrop" className="h-8 w-auto max-w-[150px] object-contain sm:max-w-[190px]" />
