@@ -68,11 +68,11 @@ export default async function FriendsPage({ searchParams }: FriendsPageProps) {
 
         <section className="space-y-5">
           <FriendshipSection title="承認待ち" empty="届いている申請はありません。">
-            {receivedPending.map((friendship) => { const other = profileById.get(friendship.requester_id); if (!other) return null; return <FriendshipCard key={friendship.id} profile={other}><div className="flex gap-2"><form action={acceptFriend}><input type="hidden" name="friendshipId" value={friendship.id} /><SubmitButton pendingText="承認中..." className="rounded-full bg-stone-950 px-4 py-2 text-sm font-bold text-white">承認</SubmitButton></form><form action={rejectFriend}><input type="hidden" name="friendshipId" value={friendship.id} /><SubmitButton pendingText="拒否中..." className="rounded-full border border-stone-200 px-4 py-2 text-sm">拒否</SubmitButton></form></div></FriendshipCard>; })}
+            {receivedPending.map((friendship) => { const other = profileById.get(friendship.requester_id); if (!other) return null; return <FriendshipCard key={friendship.id} profile={other}><div className="flex gap-2"><form action={acceptFriend}><input type="hidden" name="friendshipId" value={friendship.id} /><SubmitButton pendingText="承認中..." className="rounded-full bg-stone-950 px-3 py-1.5 text-xs font-bold text-white">承認</SubmitButton></form><form action={rejectFriend}><input type="hidden" name="friendshipId" value={friendship.id} /><SubmitButton pendingText="拒否中..." className="rounded-full border border-stone-200 px-3 py-1.5 text-xs">拒否</SubmitButton></form></div></FriendshipCard>; })}
           </FriendshipSection>
 
           <FriendshipSection title="申請中" empty="送信中の申請はありません。">
-            {sentPending.map((friendship) => { const other = profileById.get(friendship.addressee_id); if (!other) return null; return <FriendshipCard key={friendship.id} profile={other}><form action={deleteFriend}><input type="hidden" name="friendshipId" value={friendship.id} /><SubmitButton pendingText="取消中..." className="rounded-full border border-stone-200 px-4 py-2 text-sm">取消</SubmitButton></form></FriendshipCard>; })}
+            {sentPending.map((friendship) => { const other = profileById.get(friendship.addressee_id); if (!other) return null; return <FriendshipCard key={friendship.id} profile={other}><form action={deleteFriend}><input type="hidden" name="friendshipId" value={friendship.id} /><SubmitButton pendingText="取消中..." className="rounded-full border border-stone-200 px-3 py-1.5 text-xs">取消</SubmitButton></form></FriendshipCard>; })}
           </FriendshipSection>
 
           <FriendshipSection title="友達" empty="まだ友達はいません。">
@@ -84,7 +84,7 @@ export default async function FriendsPage({ searchParams }: FriendsPageProps) {
                 <FriendshipCard key={friendship.id} profile={other} memo={memoByFriendId.get(other.id) ?? ""} editableMemo>
                   <form action={deleteFriend}>
                     <input type="hidden" name="friendshipId" value={friendship.id} />
-                    <SubmitButton pendingText="削除中..." className="rounded-full border border-red-200 px-4 py-2 text-sm text-red-700">削除</SubmitButton>
+                    <SubmitButton pendingText="削除中..." className="rounded-full border border-red-200 px-3 py-1.5 text-xs font-bold text-red-700">削除</SubmitButton>
                   </form>
                 </FriendshipCard>
               );
@@ -98,36 +98,45 @@ export default async function FriendsPage({ searchParams }: FriendsPageProps) {
 
 function FriendshipSection({ title, empty, children }: { title: string; empty: string; children: React.ReactNode }) {
   const items = Array.isArray(children) ? children.filter(Boolean) : children;
-  return <div className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl"><h2 className="text-xl font-black">{title}</h2><div className="mt-4 space-y-3">{Array.isArray(items) && items.length === 0 ? <p className="rounded-3xl border border-dashed border-orange-200 p-5 text-sm text-stone-600">{empty}</p> : items}</div></div>;
+  return (
+    <div className="rounded-[1.7rem] border border-white/70 bg-white/85 p-4 shadow-sm backdrop-blur-xl">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-lg font-black">{title}</h2>
+        {Array.isArray(items) && items.length > 0 ? <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[11px] font-black text-stone-500">{items.length}</span> : null}
+      </div>
+      <div className="mt-3 space-y-2">
+        {Array.isArray(items) && items.length === 0 ? <p className="rounded-2xl border border-dashed border-orange-200 p-4 text-sm text-stone-600">{empty}</p> : items}
+      </div>
+    </div>
+  );
 }
 
 function FriendshipCard({ profile, children, memo = "", editableMemo = false }: { profile: Profile; children: React.ReactNode; memo?: string; editableMemo?: boolean }) {
   return (
-    <article className="rounded-3xl border border-stone-100 bg-white p-4 shadow-sm">
+    <article className="rounded-[1.35rem] border border-stone-100 bg-white/90 p-3 shadow-sm transition hover:border-pink-100 hover:shadow-md">
       <div className="flex items-center gap-3">
         <Avatar src={profile.avatar_url} name={profile.handle_name} />
         <div className="min-w-0 flex-1">
-          <p className="truncate font-bold">{profile.handle_name}</p>
-          <p className="truncate text-sm text-stone-500">{profile.tagline || "一言未設定"}</p>
-          {memo ? <p className="mt-1 inline-flex max-w-full rounded-full bg-gradient-to-r from-cyan-50 to-fuchsia-50 px-2.5 py-1 text-[11px] font-bold text-stone-600">自分メモ：<span className="truncate">{memo}</span></p> : null}
+          <div className="flex min-w-0 items-center gap-2">
+            <p className="truncate text-sm font-black text-stone-900">{profile.handle_name}</p>
+            {memo ? <span className="max-w-[46%] truncate rounded-full bg-gradient-to-r from-cyan-50 to-fuchsia-50 px-2 py-0.5 text-[10px] font-black text-stone-500">{memo}</span> : null}
+          </div>
+          <p className="mt-0.5 truncate text-xs text-stone-400">{profile.tagline || "一言未設定"}</p>
         </div>
-        <div className="shrink-0">{children}</div>
+        <div className="shrink-0 scale-90">{children}</div>
       </div>
       {editableMemo ? (
-        <form action={saveFriendMemo} className="mt-3 rounded-[1.25rem] border border-stone-100 bg-stone-50/70 p-3">
+        <form action={saveFriendMemo} className="mt-2 flex items-center gap-2">
           <input type="hidden" name="friendId" value={profile.id} />
-          <label className="block text-[11px] font-black uppercase tracking-[0.18em] text-stone-400">Private memo</label>
-          <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-            <input
-              name="note"
-              defaultValue={memo}
-              maxLength={80}
-              placeholder="例：高校の友達 / 田中さん / Apex仲間"
-              className="min-w-0 flex-1 rounded-2xl border border-white bg-white px-4 py-3 text-sm font-bold outline-none transition focus:border-fuchsia-300 focus:ring-4 focus:ring-fuchsia-100"
-            />
-            <SubmitButton pendingText="保存中..." className="rounded-2xl bg-stone-950 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-stone-800">保存</SubmitButton>
-          </div>
-          <p className="mt-2 text-[11px] leading-5 text-stone-400">相手には見えません。空で保存すると削除されます。</p>
+          <input
+            name="note"
+            defaultValue={memo}
+            maxLength={80}
+            placeholder="メモ"
+            aria-label="自分用メモ"
+            className="min-w-0 flex-1 rounded-2xl border border-stone-100 bg-stone-50/80 px-3 py-2 text-xs font-bold outline-none transition placeholder:text-stone-300 focus:border-fuchsia-300 focus:bg-white focus:ring-4 focus:ring-fuchsia-100"
+          />
+          <SubmitButton pendingText="..." className="rounded-2xl bg-stone-950 px-3 py-2 text-xs font-black text-white shadow-sm hover:bg-stone-800">保存</SubmitButton>
         </form>
       ) : null}
     </article>
