@@ -36,6 +36,26 @@ function checkRateLimit(request: NextRequest) {
   return null;
 }
 
+function isInvalidRefreshTokenError(error: unknown) {
+  if (!error || typeof error !== "object") return false;
+  const maybeError = error as { code?: string; message?: string };
+  const code = maybeError.code?.toLowerCase() ?? "";
+  const message = maybeError.message?.toLowerCase() ?? "";
+  return code.includes("refresh_token") || message.includes("invalid refresh token") || message.includes("refresh token not found");
+}
+
+function clearSupabaseAuthCookies(request: NextRequest, response: NextResponse) {
+  for (const cookie of request.cookies.getAll()) {
+    if (cookie.name.startsWith("sb-") || cookie.name.includes("supabase")) {
+      response.cookies.set(cookie.name, "", {
+        path: "/",
+        maxAge: 0,
+        expires: new Date(0)
+      });
+    }
+  }
+}
+
 export async function proxy(request: NextRequest) {
   const rateLimitedResponse = checkRateLimit(request);
   if (rateLimitedResponse) return rateLimitedResponse;
@@ -65,8 +85,19 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const authResult = await supabase.auth.getUser();
+  const authError = authResult.error;
+  const user = authResult.data.user;
   const isProtected = protectedPathPrefixes.some((path) => request.nextUrl.pathname.startsWith(path));
+
+  if (authError && isInvalidRefreshTokenError(authError)) {
+    const url = request.nextUrl.clone();
+    const response = isProtected
+      ? NextResponse.redirect(new URL(`/login?next=${encodeURIComponent(request.nextUrl.pathname)}`, request.url))
+      : supabaseResponse;
+    clearSupabaseAuthCookies(request, response);
+    return response;
+  }
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone();
