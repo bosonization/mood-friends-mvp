@@ -20,8 +20,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <div className="flex flex-col justify-center">
           <TransitionLink href="/" className="mb-8 inline-flex w-fit rounded-full border border-white/70 bg-white/70 px-4 py-2 text-sm font-bold backdrop-blur">← トップへ</TransitionLink>
           <h1 className="text-5xl font-black leading-tight tracking-tight">NoriDropに<span className="block bg-gradient-to-r from-[#063f2e] via-[#0b6b47] to-[#12915f] bg-clip-text text-transparent">入る。</span></h1>
-          <p className="mt-5 max-w-md leading-8 text-stone-700">ログイン後、今のノリを選択します。友達が増えるとレベルが上がり、選べる気分が増えます。</p>
-          {hasInvite ? <p className="mt-4 w-fit rounded-2xl bg-white/75 px-4 py-3 text-sm font-black text-emerald-800 shadow-sm">24時間招待リンクから登録中</p> : null}
+          <p className="mt-5 max-w-md leading-8 text-stone-700">ログイン後、今のノリを選択します。ノリを置いて、友達の今どんなノリ？を見にいきましょう。</p>
+          {hasInvite ? <p className="mt-4 w-fit rounded-2xl bg-white/75 px-4 py-3 text-sm font-black text-emerald-700 shadow-sm">24時間招待リンクから登録中</p> : null}
         </div>
 
         <section className="rounded-[2rem] border border-white/70 bg-white/80 p-5 shadow-xl shadow-emerald-100 backdrop-blur-xl">
@@ -32,7 +32,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               <input type="hidden" name="next" value={params.next ?? "/mood"} />
               <label className="mt-5 block text-sm font-bold">メールアドレス<input className="mt-2 w-full rounded-2xl border border-stone-200 px-4 py-3 outline-none focus:border-emerald-500" name="email" type="email" required autoComplete="email" /></label>
               <label className="mt-4 block text-sm font-bold">パスワード<input className="mt-2 w-full rounded-2xl border border-stone-200 px-4 py-3 outline-none focus:border-emerald-500" name="password" type="password" required minLength={6} autoComplete="current-password" /></label>
-              <SubmitButton pendingText="ログイン中..." className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[#063f2e] via-[#0b6b47] to-[#12915f] px-5 py-3 font-black text-white shadow-lg shadow-emerald-100">ログイン</SubmitButton>
+              <SubmitButton pendingText="ログイン中..." className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[#063f2e] via-[#0b6b47] to-[#12915f] px-5 py-3 font-black text-white shadow-lg shadow-emerald-100 transition hover:scale-[1.01]">ログイン</SubmitButton>
             </form>
 
             <form action={signUp} className="rounded-3xl border border-emerald-100 bg-emerald-50/70 p-5 shadow-sm">
@@ -41,7 +41,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               <label className="mt-5 block text-sm font-bold">メールアドレス<input className="mt-2 w-full rounded-2xl border border-emerald-200 px-4 py-3 outline-none focus:border-emerald-500" name="email" type="email" required autoComplete="email" /></label>
               <label className="mt-4 block text-sm font-bold">パスワード<input className="mt-2 w-full rounded-2xl border border-emerald-200 px-4 py-3 outline-none focus:border-emerald-500" name="password" type="password" required minLength={6} autoComplete="new-password" /></label>
               <label className="mt-4 block text-sm font-bold">パスワード確認<input className="mt-2 w-full rounded-2xl border border-emerald-200 px-4 py-3 outline-none focus:border-emerald-500" name="passwordConfirm" type="password" required minLength={6} autoComplete="new-password" /></label>
-              <SubmitButton pendingText="登録中..." className="mt-5 w-full rounded-2xl bg-stone-950 px-5 py-3 font-black text-white hover:bg-stone-800">登録する</SubmitButton>
+              <SubmitButton pendingText="登録中..." className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[#063f2e] via-[#0b6b47] to-[#12915f] px-5 py-3 font-black text-white shadow-lg shadow-emerald-100 transition hover:scale-[1.01]">登録する</SubmitButton>
             </form>
           </div>
         </section>

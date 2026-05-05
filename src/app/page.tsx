@@ -12,7 +12,7 @@ export default async function LandingPage() {
     <main className="min-h-screen overflow-hidden px-6 py-7">
       <nav className="mx-auto flex max-w-6xl items-center justify-between rounded-full border border-white/70 bg-white/78 px-4 py-3 shadow-sm backdrop-blur-xl">
         <div className="flex min-w-0 items-center gap-3 font-black">
-          <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-emerald-100">
+          <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-2xl">
             <img src="/noridrop-icon.png" alt="" className="h-full w-full object-cover" />
           </span>
           <img src="/noridrop-logo.png" alt="NoriDrop" className="h-8 w-auto max-w-[170px] object-contain" />
