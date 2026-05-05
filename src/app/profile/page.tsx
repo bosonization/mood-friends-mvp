@@ -1,8 +1,6 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
-import { Avatar } from "@/components/Avatar";
 import { AvatarUploader } from "@/components/AvatarUploader";
-import { CopyButton } from "@/components/CopyButton";
 import { FormMessage } from "@/components/FormMessage";
 import { SubmitButton } from "@/components/SubmitButton";
 import { updateProfile } from "./actions";
@@ -23,7 +21,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
     <AppShell>
       <section className="mx-auto max-w-2xl rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
         <p className="text-sm font-bold text-pink-700">Profile</p><h1 className="text-2xl font-black">プロフィール編集</h1>
-        <div className="mt-5 flex items-center gap-4 rounded-3xl bg-orange-50 p-4"><Avatar src={profile.avatar_url} name={profile.handle_name} size="lg" /><div className="min-w-0 flex-1"><p className="font-bold">{profile.handle_name}</p><div className="mt-1 flex flex-wrap items-center gap-2"><p className="font-mono text-sm tracking-widest text-stone-500">{profile.member_code}</p><CopyButton value={profile.member_code} /></div></div></div>
+        <p className="mt-2 text-sm leading-6 text-stone-600">画像、名前、一言、年齢区分を編集できます。</p>
         <div className="mt-5"><FormMessage message={params.message} /></div>
         <form action={updateProfile} className="mt-6 space-y-5">
           <AvatarUploader name="avatarUrl" currentUrl={profile.avatar_url} handleName={profile.handle_name} />

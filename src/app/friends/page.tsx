@@ -40,12 +40,17 @@ export default async function FriendsPage({ searchParams }: FriendsPageProps) {
       <div className="grid gap-6 lg:grid-cols-[0.86fr_1.14fr]">
         <section className="space-y-5">
           <div className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
-            <p className="text-sm font-bold text-pink-700">Friend Code</p>
-            <h1 className="text-2xl font-black">会員コードで友達申請</h1>
-            <p className="mt-2 text-sm leading-6 text-stone-600">10桁の会員コードを知っている相手にだけ申請できます。公開検索はありません。</p>
-            <div className="mt-5 rounded-[1.7rem] bg-stone-950 p-5 text-white">
-              <p className="text-sm text-stone-300">あなたの会員コード</p>
-              <div className="mt-2 flex flex-wrap items-center gap-3"><p className="font-mono text-3xl font-black tracking-widest">{profile.member_code}</p><CopyButton value={profile.member_code} /></div>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-bold text-pink-700">Friend Code</p>
+                <h1 className="text-2xl font-black">友達を追加</h1>
+                <p className="mt-2 text-sm leading-6 text-stone-600">10桁コードで知っている相手にだけ申請できます。</p>
+              </div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white/80 px-3 py-2 shadow-sm">
+                <span className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">My Code</span>
+                <span className="font-mono text-sm font-black tracking-widest text-stone-900">{profile.member_code}</span>
+                <CopyButton value={profile.member_code} />
+              </div>
             </div>
             <form action={requestFriend} className="mt-5 space-y-3">
               <label className="block text-sm font-bold">相手の会員コード<input className="mt-2 w-full rounded-2xl border border-stone-200 px-4 py-3 font-mono tracking-widest outline-none focus:border-pink-400" name="memberCode" inputMode="numeric" maxLength={10} placeholder="1234567890" required /></label>

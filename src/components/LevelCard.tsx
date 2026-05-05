@@ -109,6 +109,32 @@ export function LevelCard(props: LevelCardProps) {
   const stage = stages[status.level];
   const nextUnlock = getNextUnlock(status);
 
+  if (status.level >= 5 && status.spotlightUnlocked) {
+    return (
+      <section className="overflow-hidden rounded-[1.8rem] border border-fuchsia-100 bg-[radial-gradient(circle_at_0%_0%,rgba(217,70,239,0.22),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.9),rgba(255,255,255,0.68))] p-4 shadow-sm backdrop-blur-xl">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-fuchsia-700">Spotlight Ready</p>
+              <span className="rounded-full bg-stone-950 px-2.5 py-1 text-[10px] font-black text-white">Lv5</span>
+            </div>
+            <h2 className="mt-1 text-xl font-black text-stone-950">特別なノリを光らせる</h2>
+            <p className="mt-1 text-xs leading-5 text-stone-600">NORI LIFEは完成。Spotlightだけをシンプルに使えます。</p>
+          </div>
+          <form action={startSpotlight} className="shrink-0 sm:w-[190px]">
+            <SubmitButton
+              disabled={!canUseSpotlight}
+              pendingText="発動中..."
+              className="w-full rounded-2xl bg-gradient-to-r from-fuchsia-500 to-violet-600 px-4 py-3 text-sm font-black text-white shadow-lg shadow-fuchsia-100 disabled:cursor-not-allowed disabled:opacity-45"
+            >
+              {getLv5ButtonText(props)}
+            </SubmitButton>
+          </form>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="overflow-hidden rounded-[2rem] border border-white/70 bg-[radial-gradient(circle_at_8%_0%,rgba(255,255,255,0.95),transparent_30%),radial-gradient(circle_at_92%_12%,rgba(236,72,153,0.16),transparent_30%),linear-gradient(135deg,rgba(255,255,255,0.86),rgba(255,255,255,0.66))] p-4 shadow-sm backdrop-blur-xl">
       <div className="grid gap-4 lg:grid-cols-[auto_1fr_auto] lg:items-center">

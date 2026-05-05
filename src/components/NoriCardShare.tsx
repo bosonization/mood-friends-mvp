@@ -148,12 +148,10 @@ export function NoriCardShare({ memberCode, handleName, moodIcon, moodLabel, moo
                   className="group inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-3 py-1 text-[10px] font-black text-white shadow-lg shadow-pink-100 transition hover:scale-[1.03]"
                 >
                   <span className="text-xs">♥</span>
-                  <span>今{currentLikeCount}</span>
-                  <span className="h-3 w-px bg-white/35" />
-                  <span>前{previousLikeCount}</span>
+                  <span>{totalLikeCount}</span>
                 </button>
               ) : (
-                <span className="rounded-full bg-white/70 px-2.5 py-1 text-[10px] font-black text-stone-400 shadow-sm">♡ 0</span>
+                <span className="rounded-full bg-white/70 px-2.5 py-1 text-[10px] font-black text-stone-400 shadow-sm">♥ 0</span>
               )}
               {expiresAt ? <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-black text-stone-500">招待期限 {formatExpiresAt(expiresAt)}</span> : null}
             </div>
