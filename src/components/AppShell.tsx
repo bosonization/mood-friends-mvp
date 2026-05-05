@@ -2,6 +2,7 @@ import { TransitionLink } from "@/components/TransitionLink";
 import { SubmitButton } from "@/components/SubmitButton";
 import { AppFooter } from "@/components/AppFooter";
 import { EmotionDock } from "@/components/EmotionDock";
+import { NoriDropWordmark } from "@/components/NoriDropWordmark";
 import { signOut } from "@/app/login/actions";
 
 type AppShellProps = { children: React.ReactNode };
@@ -14,7 +15,7 @@ export function AppShell({ children }: AppShellProps) {
           <span className="block h-10 w-10 shrink-0 overflow-hidden rounded-[0.9rem]">
             <img src="/noridrop-icon.png" alt="" className="h-full w-full object-cover" />
           </span>
-          <img src="/noridrop-logo.png" alt="NoriDrop" className="h-8 w-auto max-w-[150px] object-contain sm:max-w-[190px]" />
+          <NoriDropWordmark />
         </TransitionLink>
 
         <nav className="hidden gap-2 text-sm sm:flex">

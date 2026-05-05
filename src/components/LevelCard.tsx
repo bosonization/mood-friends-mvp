@@ -21,11 +21,11 @@ const stageNames: Record<UserLevel, string> = {
 };
 
 const characterImages: Record<UserLevel, string> = {
-  1: "/nori-level-01.png",
-  2: "/nori-level-02.png",
-  3: "/nori-level-03.png",
-  4: "/nori-level-04.png",
-  5: "/nori-level-05.png"
+  1: "/01.png",
+  2: "/02.png",
+  3: "/03.png",
+  4: "/04.png",
+  5: "/05.png"
 };
 
 function getLv5ButtonText({ status, hasActiveMood, spotlightActive, spotlightUsedToday }: LevelCardProps) {
@@ -86,16 +86,12 @@ export function LevelCard(props: LevelCardProps) {
     return (
       <section className="overflow-hidden rounded-[1.8rem] border border-emerald-100 bg-[radial-gradient(circle_at_0%_0%,rgba(6,95,70,0.18),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.92),rgba(255,255,255,0.70))] p-4 shadow-sm backdrop-blur-xl">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <img src="/noridrop-icon.png" alt="" className="h-14 w-14 rounded-2xl object-cover shadow-md" />
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="text-xs font-black uppercase tracking-[0.22em] text-emerald-800">Spotlight Ready</p>
-                <span className="rounded-full bg-stone-950 px-2.5 py-1 text-[10px] font-black text-white">Lv5</span>
-              </div>
-              <h2 className="mt-1 text-xl font-black text-stone-950">特別なノリを光らせる</h2>
-              <p className="mt-1 text-xs leading-5 text-stone-600">NoriDropは完成。Spotlightだけをシンプルに使えます。</p>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-emerald-800">Spotlight Ready</p>
+              <span className="rounded-full bg-stone-950 px-2.5 py-1 text-[10px] font-black text-white">Lv5</span>
             </div>
+            <h2 className="mt-1 text-xl font-black text-stone-950">特別なノリを光らせる</h2>
           </div>
           <form action={startSpotlight} className="shrink-0 sm:w-[190px]">
             <SubmitButton

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { AppFooter } from "@/components/AppFooter";
 import { TransitionLink } from "@/components/TransitionLink";
+import { NoriDropWordmark } from "@/components/NoriDropWordmark";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function LandingPage() {
@@ -15,7 +16,7 @@ export default async function LandingPage() {
           <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-2xl">
             <img src="/noridrop-icon.png" alt="" className="h-full w-full object-cover" />
           </span>
-          <img src="/noridrop-logo.png" alt="NoriDrop" className="h-8 w-auto max-w-[170px] object-contain" />
+          <NoriDropWordmark priority className="max-w-[150px] sm:max-w-[176px]" />
         </div>
         <TransitionLink href="/login" className="rounded-full bg-stone-950 px-5 py-2.5 text-sm font-bold text-white shadow-md hover:bg-stone-800">ログイン</TransitionLink>
       </nav>

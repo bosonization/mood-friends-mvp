@@ -5,9 +5,16 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "NoriDrop",
   description: "友達の『今どんなノリ？』がわかるアプリ",
+  applicationName: "NoriDrop",
+  appleWebApp: {
+    capable: true,
+    title: "NoriDrop",
+    statusBarStyle: "default"
+  },
   icons: {
-    icon: "/app-icon.png",
-    apple: "/app-icon.png"
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png"
   }
 };
 
