@@ -32,3 +32,23 @@ export async function withdraw() {
   await supabase.auth.signOut();
   redirect("/");
 }
+
+
+export async function updateBridgeVisibility(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const showOnFriendBridge = String(formData.get("showOnFriendBridge") ?? "off") === "on";
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ show_on_friend_bridge: showOnFriendBridge })
+    .eq("id", user.id);
+
+  if (error) {
+    redirect(`/settings?message=${encodeURIComponent("Nori Bridge設定の保存に失敗しました。Supabase SQLを実行してください。")}`);
+  }
+
+  redirect(`/settings?message=${encodeURIComponent("Nori Bridge設定を保存しました。")}`);
+}

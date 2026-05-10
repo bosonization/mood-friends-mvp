@@ -3,7 +3,7 @@ import { AppShell } from "@/components/AppShell";
 import { FormMessage } from "@/components/FormMessage";
 import { SubmitButton } from "@/components/SubmitButton";
 import { TransitionLink } from "@/components/TransitionLink";
-import { updateDisplayMode, withdraw } from "./actions";
+import { updateBridgeVisibility, updateDisplayMode, withdraw } from "./actions";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeViewMode, VIEW_MODES } from "@/lib/viewMode";
 import type { Profile } from "@/lib/types";
@@ -42,6 +42,21 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
               </label>
             ))}
             <SubmitButton pendingText="保存中..." className="w-full rounded-2xl bg-gradient-to-r from-[#063f2e] via-[#0b6b47] to-[#12915f] px-5 py-3 font-black text-white shadow-lg shadow-emerald-100">表示形式を保存</SubmitButton>
+          </form>
+        </div>
+
+        <div className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
+          <h2 className="text-xl font-black">Nori Bridge</h2>
+          <p className="mt-2 text-sm leading-6 text-stone-600">共通の友達がいる人の候補に、あなたのプロフィールを表示するか選べます。承認するまでノリは見えません。</p>
+          <form action={updateBridgeVisibility} className="mt-5 rounded-[1.35rem] border border-emerald-100 bg-emerald-50/70 p-4">
+            <label className="flex cursor-pointer items-center justify-between gap-4">
+              <span>
+                <span className="block font-black text-stone-900">友達の友達に表示する</span>
+                <span className="mt-1 block text-sm text-stone-500">Nori Bridgeの候補に出ます。</span>
+              </span>
+              <input type="checkbox" name="showOnFriendBridge" defaultChecked={profile.show_on_friend_bridge ?? true} className="h-5 w-5 accent-emerald-700" />
+            </label>
+            <SubmitButton pendingText="保存中..." className="mt-4 w-full rounded-2xl bg-stone-950 px-5 py-3 font-black text-white">保存</SubmitButton>
           </form>
         </div>
 

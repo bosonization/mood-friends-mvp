@@ -107,6 +107,17 @@ export async function startMoodSession(formData: FormData) {
     redirect(`/mood?message=${encodeURIComponent("今のノリの保存に失敗しました。")}`);
   }
 
+  // Daily Nori: 1日1回のDrop記録。Quiet passでは記録しない。
+  await supabase.from("daily_nori_logs").upsert(
+    {
+      user_id: user.id,
+      log_date: now.toISOString().slice(0, 10),
+      mood_key: moodKey,
+      created_at: now.toISOString()
+    },
+    { onConflict: "user_id,log_date" }
+  );
+
   // レベル成長用のノリ更新回数。Quiet passでは加算しない。
   const nextUpdateCount = Math.min((profile.nori_update_count ?? 0) + 1, 9999);
   await supabase.from("profiles").update({ nori_update_count: nextUpdateCount }).eq("id", user.id);

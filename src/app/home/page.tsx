@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
+import { DailyNoriCard } from "@/components/DailyNoriCard";
 import { FirstLinkCelebration } from "@/components/FirstLinkCelebration";
 import { FirstLinkChallenge } from "@/components/FirstLinkChallenge";
 import { FormMessage } from "@/components/FormMessage";
@@ -12,7 +13,7 @@ import { formatRemainingTime, getMoodFreshness, isMoodSessionActive } from "@/li
 import { createClient } from "@/lib/supabase/server";
 import { getAndSyncLevelStatus } from "@/lib/level";
 import { normalizeViewMode } from "@/lib/viewMode";
-import type { FriendMemo, Friendship, MoodEntry, MoodReaction, MoodSpotlight, MoodStatus, Profile } from "@/lib/types";
+import type { DailyNoriStatus, FriendMemo, Friendship, MoodEntry, MoodReaction, MoodSpotlight, MoodStatus, Profile } from "@/lib/types";
 
 type HomePageProps = { searchParams: Promise<{ message?: string }> };
 
@@ -88,6 +89,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         .limit(1)
         .maybeSingle<MoodEntry>()
     : { data: null as MoodEntry | null };
+
+  const { data: dailyNori } = await supabase
+    .rpc("get_daily_nori_status")
+    .maybeSingle<DailyNoriStatus>();
 
   const reactionEntryIds = [
     myMood?.current_entry_id,
@@ -182,6 +187,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         />
 
         <FirstLinkChallenge friendCount={levelStatus.friendCount} memberCode={profile.member_code} handleName={profile.handle_name} />
+
+        <DailyNoriCard
+          todayDone={Boolean(dailyNori?.today_done)}
+          streak={dailyNori?.streak ?? 0}
+          moodIcon={currentMood?.icon ?? null}
+          moodLabel={currentMood?.label ?? null}
+          stealthActive={stealthActive}
+        />
 
         {currentMood ? (
           <NoriCardShare

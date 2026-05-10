@@ -10,6 +10,7 @@ export type Profile = {
   display_mode?: ViewMode | null;
   max_level?: number | null;
   nori_update_count?: number | null;
+  show_on_friend_bridge?: boolean | null;
   terms_agreed_at: string;
   created_at: string;
   updated_at: string;
@@ -69,4 +70,19 @@ export type FriendMemo = {
   note: string;
   created_at: string;
   updated_at: string;
+};
+
+
+export type DailyNoriStatus = {
+  today_done: boolean;
+  streak: number;
+  last_drop_date: string | null;
+};
+
+export type NoriBridgeCandidate = {
+  id: string;
+  handle_name: string;
+  tagline: string;
+  avatar_url: string | null;
+  mutual_count: number;
 };

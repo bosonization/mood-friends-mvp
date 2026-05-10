@@ -5,9 +5,9 @@ import { CopyButton } from "@/components/CopyButton";
 import { FormMessage } from "@/components/FormMessage";
 import { ShareInviteButton } from "@/components/ShareInviteButton";
 import { SubmitButton } from "@/components/SubmitButton";
-import { acceptFriend, deleteFriend, rejectFriend, requestFriend, saveFriendMemo } from "./actions";
+import { acceptFriend, deleteFriend, rejectFriend, requestBridgeFriend, requestFriend, saveFriendMemo } from "./actions";
 import { createClient } from "@/lib/supabase/server";
-import type { FriendMemo, Friendship, Profile } from "@/lib/types";
+import type { FriendMemo, Friendship, NoriBridgeCandidate, Profile } from "@/lib/types";
 
 type FriendsPageProps = { searchParams: Promise<{ message?: string }> };
 
@@ -38,6 +38,10 @@ export default async function FriendsPage({ searchParams }: FriendsPageProps) {
   const accepted = (friendships ?? []).filter((item) => item.status === "accepted");
   const receivedPending = (friendships ?? []).filter((item) => item.status === "pending" && item.addressee_id === user.id);
   const sentPending = (friendships ?? []).filter((item) => item.status === "pending" && item.requester_id === user.id);
+
+  const { data: bridgeCandidates } = await supabase
+    .rpc("get_nori_bridge_candidates", { max_count: 12 })
+    .returns<NoriBridgeCandidate[]>();
 
   return (
     <AppShell>
@@ -90,6 +94,12 @@ export default async function FriendsPage({ searchParams }: FriendsPageProps) {
               );
             })}
           </FriendshipSection>
+
+          <FriendshipSection title="Nori Bridge" empty="共通の友達がいる候補はまだいません。">
+            {(bridgeCandidates ?? []).map((candidate) => (
+              <BridgeCard key={candidate.id} candidate={candidate} />
+            ))}
+          </FriendshipSection>
         </section>
       </div>
     </AppShell>
@@ -139,6 +149,25 @@ function FriendshipCard({ profile, children, memo = "", editableMemo = false }: 
           <SubmitButton pendingText="..." className="rounded-2xl bg-stone-950 px-3 py-2 text-xs font-black text-white shadow-sm hover:bg-stone-800">保存</SubmitButton>
         </form>
       ) : null}
+    </article>
+  );
+}
+
+function BridgeCard({ candidate }: { candidate: NoriBridgeCandidate }) {
+  return (
+    <article className="rounded-[1.35rem] border border-emerald-100 bg-gradient-to-r from-emerald-50/80 to-white p-3 shadow-sm transition hover:shadow-md">
+      <div className="flex items-center gap-3">
+        <Avatar src={candidate.avatar_url} name={candidate.handle_name} />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-black text-stone-900">{candidate.handle_name}</p>
+          <p className="mt-0.5 truncate text-xs text-stone-500">{candidate.tagline || "一言未設定"}</p>
+          <p className="mt-1 inline-flex rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-black text-emerald-800">共通の友達 {candidate.mutual_count}人</p>
+        </div>
+        <form action={requestBridgeFriend} className="shrink-0">
+          <input type="hidden" name="targetProfileId" value={candidate.id} />
+          <SubmitButton pendingText="申請中..." className="rounded-full bg-stone-950 px-3 py-1.5 text-xs font-black text-white">申請</SubmitButton>
+        </form>
+      </div>
     </article>
   );
 }

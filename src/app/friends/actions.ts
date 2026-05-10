@@ -78,3 +78,18 @@ export async function saveFriendMemo(formData: FormData) {
 
   redirect(`/friends?message=${encodeURIComponent("自分メモを保存しました。")}`);
 }
+
+
+export async function requestBridgeFriend(formData: FormData) {
+  const supabase = await createClient();
+  const targetId = String(formData.get("targetProfileId") ?? "");
+
+  if (!targetId) {
+    redirect(`/friends?message=${encodeURIComponent("友達申請に失敗しました。")}`);
+  }
+
+  const { data, error } = await supabase.rpc("request_friend_by_profile_id", { target_id: targetId });
+  if (error) redirect(`/friends?message=${encodeURIComponent("友達申請に失敗しました。Supabase SQLが未実行の可能性があります。")}`);
+
+  redirect(`/friends?message=${encodeURIComponent(messageMap[String(data)] ?? "処理しました。")}`);
+}
