@@ -90,9 +90,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         .maybeSingle<MoodEntry>()
     : { data: null as MoodEntry | null };
 
-  const { data: dailyNori } = await supabase
-    .rpc("get_daily_nori_status")
-    .maybeSingle<DailyNoriStatus>();
+  const { data: dailyNoriRows } = await supabase.rpc("get_daily_nori_status");
+  const dailyNori = Array.isArray(dailyNoriRows)
+    ? (dailyNoriRows[0] as DailyNoriStatus | undefined)
+    : (dailyNoriRows as DailyNoriStatus | null);
 
   const reactionEntryIds = [
     myMood?.current_entry_id,

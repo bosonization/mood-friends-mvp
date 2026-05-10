@@ -39,9 +39,11 @@ export default async function FriendsPage({ searchParams }: FriendsPageProps) {
   const receivedPending = (friendships ?? []).filter((item) => item.status === "pending" && item.addressee_id === user.id);
   const sentPending = (friendships ?? []).filter((item) => item.status === "pending" && item.requester_id === user.id);
 
-  const { data: bridgeCandidates } = await supabase
-    .rpc("get_nori_bridge_candidates", { max_count: 12 })
-    .returns<NoriBridgeCandidate[]>();
+  const { data: bridgeCandidateRows } = await supabase
+    .rpc("get_nori_bridge_candidates", { max_count: 12 });
+  const bridgeCandidates = Array.isArray(bridgeCandidateRows)
+    ? (bridgeCandidateRows as NoriBridgeCandidate[])
+    : [];
 
   return (
     <AppShell>
