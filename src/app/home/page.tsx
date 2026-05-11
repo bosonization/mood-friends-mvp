@@ -9,11 +9,11 @@ import { LevelCard } from "@/components/LevelCard";
 import { NoriCardShare } from "@/components/NoriCardShare";
 import { NoriTutorial } from "@/components/NoriTutorial";
 import { getMood } from "@/lib/moods";
-import { CURRENT_TUTORIAL_VERSION } from "@/lib/tutorial";
 import { formatRelativeTime } from "@/lib/safety";
 import { formatRemainingTime, getMoodFreshness, isMoodSessionActive } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 import { getAndSyncLevelStatus } from "@/lib/level";
+import { CURRENT_TUTORIAL_VERSION } from "@/lib/tutorial";
 import { normalizeViewMode } from "@/lib/viewMode";
 import type { DailyNoriStatus, FriendMemo, Friendship, MoodEntry, MoodReaction, MoodSpotlight, MoodStatus, Profile } from "@/lib/types";
 
@@ -183,9 +183,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <FirstLinkCelebration friendCount={levelStatus.friendCount} level={levelStatus.level} />
 
       <div className="space-y-6">
-        <div className="flex justify-end">
-          <NoriTutorial forceOpen={forceTutorial} showLauncher={showTutorialLauncher} />
-        </div>
+        <NoriTutorial forceOpen={forceTutorial} showLauncher={showTutorialLauncher} />
+
         <LevelCard
           status={levelStatus}
           memberCode={profile.member_code}

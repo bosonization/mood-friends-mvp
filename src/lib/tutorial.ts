@@ -2,12 +2,12 @@ export const CURRENT_TUTORIAL_VERSION = 1;
 
 export type TutorialStep = {
   image: string;
-  label: string;
+  alt: string;
 };
 
 export const tutorialSteps: TutorialStep[] = [
-  { image: "/tutorial/chu01.png", label: "ノリの基本" },
-  { image: "/tutorial/chu02.png", label: "連絡のきっかけ" },
-  { image: "/tutorial/chu03.png", label: "友達招待" },
-  { image: "/tutorial/chu04.png", label: "成長とひみつ" }
+  { image: "/tutorial/chu01.png", alt: "ノリは1人1件、10分ごとに更新" },
+  { image: "/tutorial/chu02.png", alt: "友達の今を見て声をかけよう" },
+  { image: "/tutorial/chu03.png", alt: "友達を招待してもっとつながる" },
+  { image: "/tutorial/chu04.png", alt: "使うほど育つ。隠し要素もあるよ" }
 ];
