@@ -11,6 +11,8 @@ export type Profile = {
   max_level?: number | null;
   nori_update_count?: number | null;
   show_on_friend_bridge?: boolean | null;
+  tutorial_version?: number | null;
+  tutorial_seen_at?: string | null;
   terms_agreed_at: string;
   created_at: string;
   updated_at: string;

@@ -7,7 +7,9 @@ import { FormMessage } from "@/components/FormMessage";
 import { FriendsMoodDisplay, type FriendMoodViewItem } from "@/components/FriendsMoodDisplay";
 import { LevelCard } from "@/components/LevelCard";
 import { NoriCardShare } from "@/components/NoriCardShare";
+import { NoriTutorial } from "@/components/NoriTutorial";
 import { getMood } from "@/lib/moods";
+import { CURRENT_TUTORIAL_VERSION } from "@/lib/tutorial";
 import { formatRelativeTime } from "@/lib/safety";
 import { formatRemainingTime, getMoodFreshness, isMoodSessionActive } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
@@ -173,11 +175,17 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     previousMoodLabel: previousMood?.label ?? null
   };
 
+  const forceTutorial = (profile.tutorial_version ?? 0) < CURRENT_TUTORIAL_VERSION;
+  const showTutorialLauncher = levelStatus.level >= 3;
+
   return (
     <AppShell>
       <FirstLinkCelebration friendCount={levelStatus.friendCount} level={levelStatus.level} />
 
       <div className="space-y-6">
+        <div className="flex justify-end">
+          <NoriTutorial forceOpen={forceTutorial} showLauncher={showTutorialLauncher} />
+        </div>
         <LevelCard
           status={levelStatus}
           memberCode={profile.member_code}
